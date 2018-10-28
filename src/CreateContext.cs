@@ -7,7 +7,6 @@ namespace FolderCompare
     {
         public IMetadataSource Source { get; set; }
         public IMetadataTarget Target { get; set; }
-        public IEqualityComparer<FileMetadata> EqualityComparer { get; set; }
 
         public IEnumerable<FileMetadata> Items { get; set; }
     }

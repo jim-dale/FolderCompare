@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="CompareCommand.cs" />
     <Compile Include="CompareContext.cs" />
+    <Compile Include="CompareMode.cs" />
     <Compile Include="DisplayType.cs" />
     <Compile Include="CreateCommand.cs" />
     <Compile Include="CreateContext.cs" />

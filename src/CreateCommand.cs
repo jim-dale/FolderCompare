@@ -2,7 +2,6 @@
 namespace FolderCompare
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
 
@@ -32,7 +31,6 @@ namespace FolderCompare
             {
                 Source = Helpers.GetMetadataSource(Helpers.ExpandPath(SourcePath.Value())),
                 Target = Helpers.GetMetadataTarget(Helpers.ExpandPath(TargetPath.Value())),
-                EqualityComparer = EqualityComparer<FileMetadata>.Default,
             };
 
             Context.Items = Context.Source.GetAll();

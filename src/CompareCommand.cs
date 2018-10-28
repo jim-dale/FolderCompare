@@ -36,8 +36,8 @@ namespace FolderCompare
             {
                 LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPath.Value())),
                 RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPath.Value())),
-                Comparer = Comparer<FileMetadata>.Default,
-                EqualityComparer = EqualityComparer<FileMetadata>.Default,
+                Comparer = new HashComparer(),
+                EqualityComparer = new HashEqualityComparer(),
                 OutputType = DisplayType.ParsedValue,
             };
 
