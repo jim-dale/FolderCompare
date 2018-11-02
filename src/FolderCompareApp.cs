@@ -5,9 +5,9 @@ namespace FolderCompare
     using System.Reflection;
     using McMaster.Extensions.CommandLineUtils;
 
-    public class FolderCompare
+    public class FolderCompareApp
     {
-        public CommandLineApplication<FolderCompare> Configure(CommandLineApplication<FolderCompare> app)
+        public CommandLineApplication<FolderCompareApp> Configure(CommandLineApplication<FolderCompareApp> app)
         {
             app.Command<CreateCommand>("create", (cmd) => cmd.Model.Configure(cmd));
             app.Command<CompareCommand>("compare", (cmd) => cmd.Model.Configure(cmd));
@@ -19,7 +19,7 @@ namespace FolderCompare
 
         public string GetVersion()
         {
-            return typeof(FolderCompare)
+            return typeof(FolderCompareApp)
                 .Assembly
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                 .InformationalVersion;

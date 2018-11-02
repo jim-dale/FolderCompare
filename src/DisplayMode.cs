@@ -1,7 +1,7 @@
 ﻿
 namespace FolderCompare
 {
-    public enum DisplayType
+    public enum DisplayMode
     {
         None,
         LeftOnly,

@@ -14,11 +14,11 @@ namespace FolderCompare
 
         public void Configure(CommandLineApplication<CreateCommand> cmd)
         {
-            SourcePath = cmd.Option("-i|--input", "The folder to search.", CommandOptionType.SingleValue)
+            SourcePath = cmd.Option("-i|--input <PATH>", "Path to the folder to search.", CommandOptionType.SingleValue)
                 .IsRequired()
-                .Accepts(v => v.LegalFilePath());
+                .Accepts(v => v.ExistingDirectory());
 
-            TargetPath = cmd.Option("-o|--output", "Output JSON catalogue file.", CommandOptionType.SingleValue)
+            TargetPath = cmd.Option("-o|--output <PATH>", "Path to the JSON catalogue file to create.", CommandOptionType.SingleValue)
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 

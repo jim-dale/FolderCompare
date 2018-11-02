@@ -41,11 +41,10 @@ namespace FolderCompare
             }
             return result;
         }
+
         public static FileMetadata CreateFileMetadata(DirectoryInfo directoryInfo, FileInfo fileInfo)
         {
             var rp = directoryInfo.GetRelativePathTo(fileInfo);
-            var ph = HashStream.GetStringHashSHA512(rp);
-            var fh = HashStream.GetFileHashSHA512(fileInfo.FullName);
 
             var result = new FileMetadata
             {
@@ -56,9 +55,7 @@ namespace FolderCompare
                 LastWriteTimeUtc = fileInfo.LastWriteTimeUtc,
                 OriginalPath = fileInfo.FullName,
                 RelativePath = rp,
-                PathHash = ph,
-                FileHash = fh,
-                Hash = HashStream.GetStringHashSHA512(ph + fh)
+                PathHash = HashStream.GetStringHashSHA512(rp.ToLowerInvariant()),
             };
 
             return result;
@@ -76,33 +73,36 @@ namespace FolderCompare
             }
         }
 
-        public static void ShowDifferenceResult(FileMetadata leftItem, FileMetadata rightItem, DisplayType outputType)
+        public static void ShowDifferenceResult(FileMetadata leftItem, FileMetadata rightItem, DisplayMode outputType, int comparison)
         {
             bool show = false;
 
             switch (outputType)
             {
-                case DisplayType.LeftOnly:
+                case DisplayMode.LeftOnly:
                     show = rightItem is null;
                     break;
-                case DisplayType.RightOnly:
+                case DisplayMode.RightOnly:
                     show = leftItem is null;
                     break;
-                case DisplayType.Differences:
+                case DisplayMode.Differences:
                     show = leftItem is null || rightItem is null;
                     break;
-                case DisplayType.All:
+                case DisplayMode.All:
                     show = true;
                     break;
-                case DisplayType.None:
+                case DisplayMode.None:
                 default:
                     break;
             }
             if (show)
             {
+                //ConsoleColor colour = Console.ForegroundColor;
+                //Console.ForegroundColor = colour;
                 var text = GetPathsAsTableRow(Console.WindowWidth, leftItem?.RelativePath, rightItem?.RelativePath);
                 Console.WriteLine(text);
             }
+            Console.ResetColor();
         }
 
         public static string GetPathsAsTableRow(int width, string path1, string path2)
