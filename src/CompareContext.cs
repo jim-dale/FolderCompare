@@ -9,11 +9,11 @@ namespace FolderCompare
         public IMetadataSource LeftSource { get; set; }
         public IMetadataSource RightSource { get; set; }
         public DisplayMode OutputType { get; set; }
-        public CompareMode Mode { get; set; }
 
         // Set at runtime
         public IComparer<FileMetadata> Comparer { get; set; }
         public IEqualityComparer<FileMetadata> EqualityComparer { get; set; }
+        public IComparisonReport Report { get; set; }
 
         public IEnumerable<FileMetadata> LeftItems { get; set; }
         public IEnumerable<FileMetadata> RightItems { get; set; }

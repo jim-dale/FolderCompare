@@ -2,7 +2,6 @@
 namespace FolderCompare
 {
     using System;
-    using Newtonsoft.Json;
 
     public class FileMetadata
     {
@@ -13,10 +12,7 @@ namespace FolderCompare
         public DateTime LastWriteTimeUtc { get; set; }
         public string OriginalPath { get; set; }
         public string RelativePath { get; set; }
+        public string RelativePathHash { get; set; }
         public string ContentsHash { get; set; }
-        public string PathHash { get; set; }
-
-        [JsonIgnore]
-        public string Hash { get; set; }
     }
 }

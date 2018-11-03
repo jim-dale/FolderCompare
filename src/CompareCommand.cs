@@ -2,7 +2,6 @@
 namespace FolderCompare
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
 
@@ -33,41 +32,39 @@ namespace FolderCompare
 
         private int OnExecute()
         {
-            var mode = CompareMode.Quick;
-
-            var dateComparer = Comparer<DateTime>.Default;
-            var lengthComparer = Comparer<long>.Default;
-
             Context = new CompareContext
             {
                 LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPath.Value())),
                 RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPath.Value())),
+                OutputType = Display.HasValue() ? Display.ParsedValue : DisplayMode.All,
+
                 Comparer = new FileMetadataComparer(),
                 EqualityComparer = new HashEqualityComparer(),
-                OutputType = Display.HasValue() ? Display.ParsedValue : DisplayMode.All,
-                Mode = mode
             };
+
+            Context.Report = new ComparisonReport(Context.OutputType, Console.WindowWidth);
 
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();
 
             int combined = 0;
-            var items = Helpers.GetFullOuterJoin(Context.LeftItems, Context.RightItems, Context.EqualityComparer);
 
+            var items = Context.LeftItems.FullOuterJoin(Context.RightItems, Context.EqualityComparer);
             if (items.Any())
             {
-                Console.WriteLine(Helpers.GetPathsAsTableRow(Console.WindowWidth, Context.LeftSource.Source, Context.RightSource.Source));
+                Context.Report.OutputHeader(Context.LeftSource.Source, Context.RightSource.Source);
 
                 foreach (var item in items)
                 {
-                    int cmp = Context.Comparer.Compare(item.Item1, item.Item2);
+                    int comparison = Context.Comparer.Compare(item.Item1, item.Item2);
 
-                    Helpers.ShowDifferenceResult(item.Item1, item.Item2, Context.OutputType, cmp);
+                    Context.Report.OutputRow(item.Item1, item.Item2, comparison);
 
-                    combined |= cmp;
+                    combined |= comparison;
                 }
             }
-            return Helpers.GetComparisionResultAsExitCode(combined);
+
+            return Helpers.GetComparisonResultAsExitCode(combined);
         }
     }
 }

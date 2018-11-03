@@ -7,12 +7,12 @@ namespace FolderCompare
     {
         public override bool Equals(FileMetadata x, FileMetadata y)
         {
-            return (x.Hash == y.Hash);
+            return (x.RelativePathHash.Equals(y.RelativePathHash));
         }
 
         public override int GetHashCode(FileMetadata obj)
         {
-            return obj.Hash.GetHashCode();
+            return obj.RelativePathHash.GetHashCode();
         }
     }
 }

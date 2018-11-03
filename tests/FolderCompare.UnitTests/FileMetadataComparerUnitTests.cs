@@ -20,14 +20,14 @@ namespace FolderCompare.UnitTests
             {
                 Length = 100,
                 LastWriteTimeUtc = DateTime.MinValue,
-                Hash = "abcdefg",
+                RelativePathHash = "abcdefg",
             };
 
             _greaterThan = new FileMetadata
             {
                 Length = 200,
                 LastWriteTimeUtc = DateTime.MaxValue,
-                Hash = "hijklmn",
+                RelativePathHash = "hijklmn",
             };
         }
 
@@ -46,7 +46,7 @@ namespace FolderCompare.UnitTests
             {
                 Length = _lessThan.Length,
                 LastWriteTimeUtc = _lessThan.LastWriteTimeUtc,
-                Hash = _lessThan.Hash,
+                RelativePathHash = _lessThan.RelativePathHash,
             };
 
             var cmp = _sut.Compare(_lessThan, other);
@@ -108,7 +108,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_RightLastWriteTimeUtcIsMOreRecent_RightLastWriteGreater()
         {
-            _greaterThan.Hash = _lessThan.Hash;
+            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
             _greaterThan.Length = _lessThan.Length;
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
@@ -119,7 +119,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_LeftLastWriteTimeUtcIsMOreRecent_LeftLastWriteGreater()
         {
-            _greaterThan.Hash = _lessThan.Hash;
+            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
             _greaterThan.Length = _lessThan.Length;
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);
@@ -132,7 +132,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_RightFileLengthIsBigger_RightLengthGreater()
         {
-            _greaterThan.Hash = _lessThan.Hash;
+            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
@@ -143,7 +143,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_LeftFileLengthIsBigger_LeftLengthGreater()
         {
-            _greaterThan.Hash = _lessThan.Hash;
+            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);

@@ -6,10 +6,6 @@ namespace FolderCompare
 
     public class FileMetadataComparer : Comparer<FileMetadata>
     {
-        private readonly IComparer<FileMetadata> _hashComparer = new HashComparer();
-        private IComparer<DateTime?> _dateComparer=Comparer<Nullable<DateTime>>.Default;
-        private IComparer<long?> _lengthComparer = Comparer<Nullable<long>>.Default;
-
         public const int Equal = 0;
         public const int LeftHashGreater = 1;
         public const int LeftLastWriteGreater = 2;
@@ -18,11 +14,15 @@ namespace FolderCompare
         public const int RightLastWriteGreater = -2;
         public const int RightLengthGreater = -3;
 
+        private readonly IComparer<FileMetadata> _hashComparer = new RelativePathHashComparer();
+        private readonly IComparer<DateTime?> _dateComparer = Comparer<Nullable<DateTime>>.Default;
+        private readonly IComparer<long?> _lengthComparer = Comparer<Nullable<long>>.Default;
+
         public override int Compare(FileMetadata left, FileMetadata right)
         {
             int result = Equal;
 
-            int cmp = string.Compare(left?.Hash, right?.Hash);
+            int cmp = _hashComparer.Compare(left, right);
             if (cmp == Equal)
             {
                 cmp = _dateComparer.Compare(left?.LastWriteTimeUtc, right?.LastWriteTimeUtc);
