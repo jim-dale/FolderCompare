@@ -33,14 +33,9 @@ namespace FolderCompare
             Console.WriteLine(JoinLeftAndRightColumns(str1, str2));
         }
 
-        public void OutputRow(FileMetadata item1, FileMetadata item2, int cmp)
+        public void OutputRow(FileMetadata leftItem, FileMetadata rightItem, int comparison)
         {
-            ShowDifferenceResult(item1, item2, cmp);
-        }
-
-        public void ShowDifferenceResult(FileMetadata leftItem, FileMetadata rightItem, int comparison)
-        {
-            if (GetShouldShow(leftItem, rightItem))
+            if (GetShouldShow(leftItem, rightItem, comparison))
             {
                 //ConsoleColor colour = Console.ForegroundColor;
                 //Console.ForegroundColor = colour;
@@ -52,20 +47,20 @@ namespace FolderCompare
             Console.ResetColor();
         }
 
-        private bool GetShouldShow(FileMetadata leftItem, FileMetadata rightItem)
+        private bool GetShouldShow(FileMetadata leftItem, FileMetadata rightItem, int comparison)
         {
             bool result = false;
 
             switch (_outputType)
             {
                 case DisplayMode.LeftOnly:
-                    result = rightItem is null;
+                    result = (comparison > 0);
                     break;
                 case DisplayMode.RightOnly:
-                    result = leftItem is null;
+                    result = (comparison < 0);
                     break;
                 case DisplayMode.Differences:
-                    result = leftItem is null || rightItem is null;
+                    result = (comparison != 0);
                     break;
                 case DisplayMode.All:
                     result = true;

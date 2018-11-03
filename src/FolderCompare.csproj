@@ -56,7 +56,6 @@
     <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="IComparisonReport.cs" />
-    <Compile Include="RelativePathHashComparer.cs" />
     <Compile Include="HashEqualityComparer.cs" />
     <Compile Include="HashStream.cs" />
     <Compile Include="Helpers.cs" />

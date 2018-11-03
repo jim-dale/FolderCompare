@@ -7,22 +7,22 @@ namespace FolderCompare
     public class FileMetadataComparer : Comparer<FileMetadata>
     {
         public const int Equal = 0;
-        public const int LeftHashGreater = 1;
+        public const int LeftRelPathGreater = 1;
         public const int LeftLastWriteGreater = 2;
         public const int LeftLengthGreater = 3;
-        public const int RightHashGreater = 1;
+        public const int RightRelPathGreater = 1;
         public const int RightLastWriteGreater = -2;
         public const int RightLengthGreater = -3;
 
-        private readonly IComparer<FileMetadata> _hashComparer = new RelativePathHashComparer();
-        private readonly IComparer<DateTime?> _dateComparer = Comparer<Nullable<DateTime>>.Default;
-        private readonly IComparer<long?> _lengthComparer = Comparer<Nullable<long>>.Default;
+        private readonly IComparer<String> _hashComparer = Comparer<String>.Default;
+        private readonly IComparer<DateTime?> _dateComparer = Comparer<DateTime?>.Default;
+        private readonly IComparer<long?> _lengthComparer = Comparer<long?>.Default;
 
         public override int Compare(FileMetadata left, FileMetadata right)
         {
             int result = Equal;
 
-            int cmp = _hashComparer.Compare(left, right);
+            int cmp = _hashComparer.Compare(left?.RelativePathHash, right?.RelativePathHash);
             if (cmp == Equal)
             {
                 cmp = _dateComparer.Compare(left?.LastWriteTimeUtc, right?.LastWriteTimeUtc);
@@ -41,7 +41,7 @@ namespace FolderCompare
             }
             else
             {
-                result = (cmp > 0) ? LeftHashGreater : RightHashGreater;
+                result = (cmp > 0) ? LeftRelPathGreater : RightRelPathGreater;
             }
 
             return result;

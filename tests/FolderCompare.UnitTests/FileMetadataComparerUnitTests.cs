@@ -68,7 +68,7 @@ namespace FolderCompare.UnitTests
         {
             var cmp = _sut.Compare(null, _greaterThan);
 
-            Assert.AreEqual(FileMetadataComparer.RightHashGreater, cmp);
+            Assert.AreEqual(FileMetadataComparer.RightRelPathGreater, cmp);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace FolderCompare.UnitTests
         {
             var cmp = _sut.Compare(_lessThan, null);
 
-            Assert.AreEqual(FileMetadataComparer.LeftHashGreater, cmp);
+            Assert.AreEqual(FileMetadataComparer.LeftRelPathGreater, cmp);
         }
         #endregion
 
@@ -89,7 +89,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
 
-            Assert.AreEqual(FileMetadataComparer.RightHashGreater, cmp);
+            Assert.AreEqual(FileMetadataComparer.RightRelPathGreater, cmp);
         }
 
         [TestMethod]
@@ -100,7 +100,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);
 
-            Assert.AreEqual(FileMetadataComparer.LeftHashGreater, cmp);
+            Assert.AreEqual(FileMetadataComparer.LeftRelPathGreater, cmp);
         }
         #endregion
 
