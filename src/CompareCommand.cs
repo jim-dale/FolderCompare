@@ -39,7 +39,7 @@ namespace FolderCompare
                 OutputType = Display.HasValue() ? Display.ParsedValue : DisplayMode.All,
 
                 Comparer = new FileMetadataComparer(),
-                EqualityComparer = new HashEqualityComparer(),
+                EqualityComparer = new RelPathHashEqualityComparer(),
             };
 
             Context.Report = new ComparisonReport(Context.OutputType, Console.WindowWidth);

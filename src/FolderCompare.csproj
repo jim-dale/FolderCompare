@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="CompareCommand.cs" />
     <Compile Include="CompareContext.cs" />
+    <Compile Include="ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
     <Compile Include="CreateCommand.cs" />
     <Compile Include="CreateContext.cs" />
@@ -56,7 +57,7 @@
     <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="IComparisonReport.cs" />
-    <Compile Include="HashEqualityComparer.cs" />
+    <Compile Include="RelPathHashEqualityComparer.cs" />
     <Compile Include="HashStream.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IEnumerableOfTExtensions.cs" />
