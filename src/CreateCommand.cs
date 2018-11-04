@@ -23,7 +23,7 @@ namespace FolderCompare
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 
-            GenerateContentHash = cmd.Option("-g|--generate-content-hash", "Generate Hash of the contents of each file.", CommandOptionType.NoValue);
+            GenerateContentHash = cmd.Option("-h|--hash-contents", "Generate a hash of the contents of each file.", CommandOptionType.NoValue);
 
             cmd.OnExecute((Func<int>)OnExecute);
         }
