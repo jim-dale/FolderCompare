@@ -9,6 +9,7 @@ namespace FolderCompare
     {
         public CommandOption SourcePath { get; private set; }
         public CommandOption TargetPath { get; private set; }
+        public CommandOption GenerateContentHash { get; private set; }
 
         public CreateContext Context { get; private set; }
 
@@ -22,6 +23,8 @@ namespace FolderCompare
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 
+            GenerateContentHash = cmd.Option("-g|--generate-content-hash", "Generate Hash of the contents of each file.", CommandOptionType.NoValue);
+
             cmd.OnExecute((Func<int>)OnExecute);
         }
 
@@ -31,11 +34,20 @@ namespace FolderCompare
             {
                 Source = Helpers.GetMetadataSource(Helpers.ExpandPath(SourcePath.Value())),
                 Target = Helpers.GetMetadataTarget(Helpers.ExpandPath(TargetPath.Value())),
+                GenerateContentsHash = GenerateContentHash.HasValue(),
             };
 
             Context.Items = Context.Source.GetAll();
             if (Context.Items.Any())
             {
+                if (Context.GenerateContentsHash)
+                {
+                    foreach (var item in Context.Items)
+                    {
+                        item.ContentsHash = HashStream.GetFileHashSHA512(item.OriginalPath);
+                    }
+                }
+
                 Context.Target.SaveAll(Context.Items);
             }
             return ExitCode.Okay;
