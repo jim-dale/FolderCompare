@@ -27,20 +27,24 @@ namespace FolderCompare
 
         public void OutputHeader(string leftSource, string rightSource)
         {
-            string str1 = GetAsTableRow(leftSource, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
-            string str2 = GetAsTableRow(leftSource, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
+            string p1 = NativeMethods.CompactPath(leftSource, _pathMaxLen);
+            string p2 = NativeMethods.CompactPath(rightSource, _pathMaxLen);
 
-            Console.WriteLine(JoinLeftAndRightColumns(str1, str2));
+            string str1 = GetAsTableRow(p1, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
+            string str2 = GetAsTableRow(p2, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
+
+            string row = JoinLeftAndRightColumns(str1, str2);
+            Console.WriteLine(row);
         }
 
-        public void OutputRow(FileMetadata leftItem, FileMetadata rightItem, int comparison)
+        public void OutputRow(FileMetadata leftItem, FileMetadata rightItem, int comparison, bool? areEqual = null)
         {
             if (GetShouldShow(leftItem, rightItem, comparison))
             {
                 //ConsoleColor colour = Console.ForegroundColor;
                 //Console.ForegroundColor = colour;
                 //var text = GetPathsAsTableRow(Console.WindowWidth, leftItem?.RelativePath, rightItem?.RelativePath);
-                var text = GetAsTableRow(leftItem, rightItem);
+                var text = GetAsTableRow(leftItem, rightItem, areEqual);
 
                 Console.WriteLine(text);
             }
@@ -73,12 +77,12 @@ namespace FolderCompare
             return result;
         }
 
-        public string GetAsTableRow(FileMetadata item1, FileMetadata item2)
+        public string GetAsTableRow(FileMetadata item1, FileMetadata item2, bool? areEqual)
         {
             string part1 = GetAsTableRow(item1);
             string part2 = GetAsTableRow(item2);
 
-            return JoinLeftAndRightColumns(part1, part2);
+            return JoinLeftAndRightColumns(part1, part2, areEqual);
         }
 
         public string GetAsTableRow(FileMetadata item)
@@ -113,16 +117,35 @@ namespace FolderCompare
             return sb.ToString();
         }
 
-        private string JoinLeftAndRightColumns(string part1, string part2)
+        private string JoinLeftAndRightColumns(string part1, string part2, bool? areEqual = null)
         {
             StringBuilder sb = new StringBuilder(_deviceWidth);
 
             sb.Append(part1);
             sb.Append(' ', _majorColumnWidth - part1.Length);
-            sb.Append(" | ");
+            sb.Append(GetEqualitySeparator(areEqual));
             sb.Append(part2);
 
             return sb.ToString();
+        }
+
+        private static string GetEqualitySeparator(bool? areEqual)
+        {
+            string result = " | ";
+
+            switch (areEqual)
+            {
+                case false:
+                    result = " \u2260 ";
+                    break;
+                case true:
+                    result = " = ";
+                    break;
+                case null:
+                default:
+                    break;
+            }
+            return result;
         }
 
         /// <summary>

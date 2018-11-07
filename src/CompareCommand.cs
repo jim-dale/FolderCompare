@@ -2,6 +2,7 @@
 namespace FolderCompare
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
 
@@ -9,6 +10,7 @@ namespace FolderCompare
     {
         public CommandOption LeftPath { get; private set; }
         public CommandOption RightPath { get; private set; }
+        public CommandOption CompareContentsHash { get; private set; }
         public CommandOption<DisplayMode> Display { get; private set; }
 
         public CompareContext Context { get; private set; }
@@ -23,8 +25,9 @@ namespace FolderCompare
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 
-            var s = String.Join(", ", Enum.GetNames(typeof(DisplayMode)));
-            Display = cmd.Option<DisplayMode>("-d|--displayMode <MODE>", s, CommandOptionType.SingleValue)
+            CompareContentsHash = cmd.Option("-cch|--compare-contents-hash", "", CommandOptionType.NoValue);
+
+            Display = cmd.Option<DisplayMode>("-d|--displayMode <MODE>", Helpers.DisplayModeNamesAsString(), CommandOptionType.SingleValue)
                 .Accepts(v => v.Enum<DisplayMode>(true));
 
             cmd.OnExecute((Func<int>)OnExecute);
@@ -40,6 +43,7 @@ namespace FolderCompare
 
                 Comparer = new FileMetadataComparer(),
                 EqualityComparer = new RelPathHashEqualityComparer(),
+                ContentsComparer = CompareContentsHash.HasValue() ? new ContentsHashEqualityComparer() : default(IEqualityComparer<FileMetadata>),
             };
 
             Context.Report = new ComparisonReport(Context.OutputType, Console.WindowWidth);
@@ -57,10 +61,15 @@ namespace FolderCompare
                 foreach (var item in items)
                 {
                     int comparison = Context.Comparer.Compare(item.Item1, item.Item2);
-
-                    Context.Report.OutputRow(item.Item1, item.Item2, comparison);
-
                     combined |= comparison;
+
+                    bool? areEqual = null;
+                    if (item.Item1?.ContentsHash != null && item.Item2?.ContentsHash != null && Context.ContentsComparer != null)
+                    {
+                        areEqual = Context.ContentsComparer.Equals(item.Item1, item.Item2);
+                    }
+
+                    Context.Report.OutputRow(item.Item1, item.Item2, comparison, areEqual);
                 }
             }
 

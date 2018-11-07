@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="CompareCommand.cs" />
     <Compile Include="CompareContext.cs" />
+    <Compile Include="ContentsCommand.cs" />
     <Compile Include="ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
     <Compile Include="CreateCommand.cs" />

@@ -2,7 +2,9 @@
 namespace FolderCompare
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
 
     public static class Helpers
     {
@@ -11,6 +13,11 @@ namespace FolderCompare
         public static string ExpandPath(string path)
         {
             return Environment.ExpandEnvironmentVariables(path);
+        }
+
+        public static string DisplayModeNamesAsString()
+        {
+            return String.Join(", ", Enum.GetNames(typeof(DisplayMode)));
         }
 
         public static IMetadataSource GetMetadataSource(string path)
@@ -56,6 +63,23 @@ namespace FolderCompare
             };
 
             return result;
+        }
+
+        public static void GenerateHashOfContents(IEnumerable<FileMetadata> items, bool force)
+        {
+            var query = items;
+
+            if (force == false)
+            {
+                query = from i in items
+                        where i.ContentsHash is null
+                        select i;
+            }
+
+            foreach (var item in query)
+            {
+                item.ContentsHash = HashStream.GetFileHashSHA512(item.OriginalPath);
+            }
         }
 
         public static int GetComparisonResultAsExitCode(int cmp)

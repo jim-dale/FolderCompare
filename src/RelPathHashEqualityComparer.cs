@@ -5,9 +5,11 @@ namespace FolderCompare
 
     public class RelPathHashEqualityComparer : EqualityComparer<FileMetadata>
     {
+        private readonly IEqualityComparer<string> _comparer = EqualityComparer<string>.Default;
+
         public override bool Equals(FileMetadata x, FileMetadata y)
         {
-            return (x.RelativePathHash.Equals(y.RelativePathHash));
+            return _comparer.Equals(x?.RelativePathHash, y?.RelativePathHash);
         }
 
         public override int GetHashCode(FileMetadata obj)

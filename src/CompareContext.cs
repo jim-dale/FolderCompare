@@ -13,6 +13,8 @@ namespace FolderCompare
         // Set at runtime
         public IComparer<FileMetadata> Comparer { get; set; }
         public IEqualityComparer<FileMetadata> EqualityComparer { get; set; }
+        public IEqualityComparer<FileMetadata> ContentsComparer { get; set; }
+
         public IComparisonReport Report { get; set; }
 
         public IEnumerable<FileMetadata> LeftItems { get; set; }

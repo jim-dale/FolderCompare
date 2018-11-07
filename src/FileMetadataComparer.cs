@@ -14,7 +14,7 @@ namespace FolderCompare
         public const int RightLastWriteGreater = -2;
         public const int RightLengthGreater = -3;
 
-        private readonly IComparer<String> _hashComparer = Comparer<String>.Default;
+        private readonly IComparer<string> _hashComparer = Comparer<string>.Default;
         private readonly IComparer<DateTime?> _dateComparer = Comparer<DateTime?>.Default;
         private readonly IComparer<long?> _lengthComparer = Comparer<long?>.Default;
 
