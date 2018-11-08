@@ -58,8 +58,8 @@ namespace FolderCompare
             Context.RightItems = rightItems.Except(leftItems, Context.EqualityComparer);
 
             // Remove items with duplicate ContentsHash value
-            Context.LeftItems = Context.LeftItems.GetUniques(i => i.ContentsHash);
-            Context.RightItems = Context.RightItems.GetUniques(i => i.ContentsHash);
+            Context.LeftItems = Context.LeftItems.RemoveDuplicates(i => i.ContentsHash);
+            Context.RightItems = Context.RightItems.RemoveDuplicates(i => i.ContentsHash);
 
             int combined = 0;
 
@@ -80,22 +80,22 @@ namespace FolderCompare
             return Helpers.GetComparisonResultAsExitCode(combined);
         }
 
-        private static void DumpDuplicates(IEnumerable<FileMetadata> items)
+        private static void DumpDuplicates(IEnumerable<FileMetadata> items, string collectionName)
         {
             var duplicates = items.GetDuplicates(i => i.ContentsHash);
-            if (duplicates.Any())
-            {
-                Console.WriteLine($"{duplicates.Count()}");
-                Console.WriteLine();
 
-                foreach (var g in duplicates)
+            Console.WriteLine("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+            Console.WriteLine($"{collectionName} has {items.Count()} items, of which there are {duplicates.Count()} duplicates");
+            Console.WriteLine();
+
+            foreach (var g in duplicates)
+            {
+                Console.WriteLine("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +");
+                foreach (var item in g)
                 {
-                    Console.WriteLine("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +");
-                    foreach (var item in g)
-                    {
-                        Console.WriteLine(item.RelativePath);
-                    }
+                    Console.WriteLine(item.RelativePath);
                 }
+
             }
         }
     }

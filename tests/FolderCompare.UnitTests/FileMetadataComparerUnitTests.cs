@@ -68,7 +68,8 @@ namespace FolderCompare.UnitTests
         {
             var cmp = _sut.Compare(null, _greaterThan);
 
-            Assert.AreEqual(FileMetadataComparer.RightRelPathGreater, cmp);
+            Assert.IsTrue(cmp < 0);
+            Assert.AreEqual(FileMetadataComparer.RightOnly, cmp);
         }
 
         [TestMethod]
@@ -76,7 +77,8 @@ namespace FolderCompare.UnitTests
         {
             var cmp = _sut.Compare(_lessThan, null);
 
-            Assert.AreEqual(FileMetadataComparer.LeftRelPathGreater, cmp);
+            Assert.IsTrue(cmp > 0);
+            Assert.AreEqual(FileMetadataComparer.LeftOnly, cmp);
         }
         #endregion
 
@@ -89,6 +91,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
 
+            Assert.IsTrue(cmp < 0);
             Assert.AreEqual(FileMetadataComparer.RightRelPathGreater, cmp);
         }
 
@@ -100,6 +103,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);
 
+            Assert.IsTrue(cmp > 0);
             Assert.AreEqual(FileMetadataComparer.LeftRelPathGreater, cmp);
         }
         #endregion
@@ -113,6 +117,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
 
+            Assert.IsTrue(cmp < 0);
             Assert.AreEqual(FileMetadataComparer.RightLastWriteGreater, cmp);
         }
 
@@ -124,6 +129,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);
 
+            Assert.IsTrue(cmp > 0);
             Assert.AreEqual(FileMetadataComparer.LeftLastWriteGreater, cmp);
         }
         #endregion
@@ -137,6 +143,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_lessThan, _greaterThan);
 
+            Assert.IsTrue(cmp < 0);
             Assert.AreEqual(FileMetadataComparer.RightLengthGreater, cmp);
         }
 
@@ -148,6 +155,7 @@ namespace FolderCompare.UnitTests
 
             var cmp = _sut.Compare(_greaterThan, _lessThan);
 
+            Assert.IsTrue(cmp > 0);
             Assert.AreEqual(FileMetadataComparer.LeftLengthGreater, cmp);
         }
         #endregion

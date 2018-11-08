@@ -15,7 +15,7 @@ namespace FolderCompare
             return query;
         }
 
-        public static IEnumerable<TSource> GetUniques<TSource, TKey>(this IEnumerable<TSource> items, Func<TSource, TKey> keySelector)
+        public static IEnumerable<TSource> RemoveDuplicates<TSource, TKey>(this IEnumerable<TSource> items, Func<TSource, TKey> keySelector)
         {
             var query = items.GroupBy(keySelector)
                         .Where(g => g.Count() == 1)

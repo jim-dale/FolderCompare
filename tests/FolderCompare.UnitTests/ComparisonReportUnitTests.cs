@@ -33,7 +33,7 @@ namespace FolderCompare.UnitTests
             var expected = @"abcdefg\hijklmnop\rstuvw\xyz\0123456789.dat   2016-09-08 15:26:44Z   100 bytes | abcdefg\hijklmnop\rstuvw\xyz\0123456789.dat   9999-12-31 23:59:59Z   200 bytes";
 
             var sut = new ConsoleComparisonReport(DisplayMode.All, 160);
-            string actual = sut.GetAsTableRow(_item1, _item2);
+            string actual = sut.GetAsRow(_item1, _item2, null);
 
             Assert.AreEqual(expected, actual);
         }
