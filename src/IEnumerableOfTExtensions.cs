@@ -15,6 +15,15 @@ namespace FolderCompare
             return query;
         }
 
+        public static IEnumerable<TSource> GetUniques<TSource, TKey>(this IEnumerable<TSource> items, Func<TSource, TKey> keySelector)
+        {
+            var query = items.GroupBy(keySelector)
+                        .Where(g => g.Count() == 1)
+                        .Select(g =>g.First());
+
+            return query;
+        }
+
         public static IEnumerable<ValueTuple<TSource, TSource>> FullOuterJoin<TSource>(this IEnumerable<TSource> items1, IEnumerable<TSource> items2, IEqualityComparer<TSource> comparer)
         {
             var items = items1.Union(items2, comparer);

@@ -4,7 +4,7 @@ namespace FolderCompare
     using System;
     using System.Text;
 
-    public class ComparisonReport : IComparisonReport
+    public class ConsoleComparisonReport : IComparisonReport
     {
         private const int DateStrLength = 22;
         private const int LengthStrLength = 12;
@@ -16,7 +16,11 @@ namespace FolderCompare
         private readonly int _majorColumnWidth;
         private readonly int _pathMaxLen;
 
-        public ComparisonReport(DisplayMode outputType, int deviceWidth)
+        private bool _showHeader = false;
+        private string _leftSource;
+        private string _rightSource;
+
+        public ConsoleComparisonReport(DisplayMode outputType, int deviceWidth)
         {
             _outputType = outputType;
 
@@ -25,67 +29,54 @@ namespace FolderCompare
             _pathMaxLen = _majorColumnWidth - DateStrLength - LengthStrLength;
         }
 
-        public void OutputHeader(string leftSource, string rightSource)
+        public void SetSources(string leftSource, string rightSource)
         {
-            string p1 = NativeMethods.CompactPath(leftSource, _pathMaxLen);
-            string p2 = NativeMethods.CompactPath(rightSource, _pathMaxLen);
+            _leftSource = leftSource;
+            _rightSource = rightSource;
 
-            string str1 = GetAsTableRow(p1, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
-            string str2 = GetAsTableRow(p2, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
-
-            string row = JoinLeftAndRightColumns(str1, str2);
-            Console.WriteLine(row);
+            _showHeader = true;
         }
 
         public void OutputRow(FileMetadata leftItem, FileMetadata rightItem, int comparison, bool? areEqual = null)
         {
-            if (GetShouldShow(leftItem, rightItem, comparison))
+            if (Helpers.GetShouldShowRow(_outputType, leftItem, rightItem, comparison))
             {
+                if (_showHeader)
+                {
+                    OutputHeader();
+                    _showHeader = false;
+                }
                 //ConsoleColor colour = Console.ForegroundColor;
                 //Console.ForegroundColor = colour;
                 //var text = GetPathsAsTableRow(Console.WindowWidth, leftItem?.RelativePath, rightItem?.RelativePath);
-                var text = GetAsTableRow(leftItem, rightItem, areEqual);
+                var text = GetAsRow(leftItem, rightItem, areEqual);
 
                 Console.WriteLine(text);
             }
             Console.ResetColor();
         }
 
-        private bool GetShouldShow(FileMetadata leftItem, FileMetadata rightItem, int comparison)
+        private void OutputHeader()
         {
-            bool result = false;
+            string p1 = NativeMethods.CompactPath(_leftSource, _pathMaxLen);
+            string p2 = NativeMethods.CompactPath(_rightSource, _pathMaxLen);
 
-            switch (_outputType)
-            {
-                case DisplayMode.LeftOnly:
-                    result = (comparison > 0);
-                    break;
-                case DisplayMode.RightOnly:
-                    result = (comparison < 0);
-                    break;
-                case DisplayMode.Differences:
-                    result = (comparison != 0);
-                    break;
-                case DisplayMode.All:
-                    result = true;
-                    break;
-                case DisplayMode.None:
-                default:
-                    break;
-            }
+            string str1 = GetAsColumn(p1, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
+            string str2 = GetAsColumn(p2, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
 
-            return result;
+            string row = JoinLeftAndRightColumns(str1, str2);
+            Console.WriteLine(row);
         }
 
-        public string GetAsTableRow(FileMetadata item1, FileMetadata item2, bool? areEqual)
+        public string GetAsRow(FileMetadata item1, FileMetadata item2, bool? areEqual)
         {
-            string part1 = GetAsTableRow(item1);
-            string part2 = GetAsTableRow(item2);
+            string part1 = GetAsColumn(item1);
+            string part2 = GetAsColumn(item2);
 
             return JoinLeftAndRightColumns(part1, part2, areEqual);
         }
 
-        public string GetAsTableRow(FileMetadata item)
+        public string GetAsColumn(FileMetadata item)
         {
             string result = String.Empty;
 
@@ -95,13 +86,13 @@ namespace FolderCompare
                 string lengthStr = NativeMethods.FormatByteSizeEx(item.Length, LengthStrLength);
                 string path = NativeMethods.CompactPath(item.RelativePath, _pathMaxLen);
 
-                result = GetAsTableRow(path, _pathMaxLen, dateStr, DateStrLength, lengthStr, LengthStrLength);
+                result = GetAsColumn(path, _pathMaxLen, dateStr, DateStrLength, lengthStr, LengthStrLength);
             }
 
             return result;
         }
 
-        private string GetAsTableRow(string str1, int str1MaxLen, string str2, int str2MaxLen, string str3, int str3MaxLen)
+        private string GetAsColumn(string str1, int str1MaxLen, string str2, int str2MaxLen, string str3, int str3MaxLen)
         {
             StringBuilder sb = new StringBuilder(_majorColumnWidth);
 

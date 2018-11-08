@@ -82,6 +82,35 @@ namespace FolderCompare
             }
         }
 
+        public static bool GetShouldShowRow(DisplayMode outputType, FileMetadata leftItem, FileMetadata rightItem, int comparison)
+        {
+            bool result = false;
+
+            switch (outputType)
+            {
+                case DisplayMode.Same:
+                    result = (comparison == 0);
+                    break;
+                case DisplayMode.LeftOnly:
+                    result = (comparison > 0);
+                    break;
+                case DisplayMode.RightOnly:
+                    result = (comparison < 0);
+                    break;
+                case DisplayMode.Differences:
+                    result = (comparison != 0);
+                    break;
+                case DisplayMode.All:
+                    result = true;
+                    break;
+                case DisplayMode.None:
+                default:
+                    break;
+            }
+
+            return result;
+        }
+
         public static int GetComparisonResultAsExitCode(int cmp)
         {
             return (cmp == 0) ? ExitCode.FoldersAreTheSame : ExitCode.FoldersAreDifferent;

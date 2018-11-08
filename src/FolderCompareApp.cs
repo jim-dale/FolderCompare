@@ -11,6 +11,7 @@ namespace FolderCompare
         {
             app.Command<CreateCommand>("create", (cmd) => cmd.Model.Configure(cmd));
             app.Command<CompareCommand>("compare", (cmd) => cmd.Model.Configure(cmd));
+            app.Command<MovedCommand>("moved", (cmd) => cmd.Model.Configure(cmd));
 
             app.VersionOption("--version", app.Model.GetVersion);
 

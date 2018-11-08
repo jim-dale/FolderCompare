@@ -46,7 +46,7 @@ namespace FolderCompare
                 ContentsComparer = CompareContentsHash.HasValue() ? new ContentsHashEqualityComparer() : default(IEqualityComparer<FileMetadata>),
             };
 
-            Context.Report = new ComparisonReport(Context.OutputType, Console.WindowWidth);
+            Context.Report = new ConsoleComparisonReport(Context.OutputType, Console.WindowWidth);
 
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();
@@ -56,7 +56,7 @@ namespace FolderCompare
             var items = Context.LeftItems.FullOuterJoin(Context.RightItems, Context.EqualityComparer);
             if (items.Any())
             {
-                Context.Report.OutputHeader(Context.LeftSource.Source, Context.RightSource.Source);
+                Context.Report.SetSources(Context.LeftSource.Source, Context.RightSource.Source);
 
                 foreach (var item in items)
                 {
