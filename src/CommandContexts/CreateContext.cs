@@ -7,7 +7,7 @@ namespace FolderCompare
     {
         public IMetadataSource Source { get; set; }
         public IMetadataTarget Target { get; set; }
-        public bool GenerateContentsHash { get; set; }
+        public bool NoHashContents { get; set; }
 
         public IEnumerable<FileMetadata> Items { get; set; }
     }

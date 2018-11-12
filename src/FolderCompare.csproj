@@ -45,33 +45,35 @@
   <ItemGroup>
     <Compile Include="Commands\CompareCommand.cs" />
     <Compile Include="CommandContexts\CompareContext.cs" />
+    <Compile Include="ContentsMode.cs" />
     <Compile Include="Commands\MovedCommand.cs" />
     <Compile Include="CommandContexts\MovedContext.cs" />
-    <Compile Include="ContentsHashEqualityComparer.cs" />
+    <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
     <Compile Include="Commands\CreateCommand.cs" />
     <Compile Include="CommandContexts\CreateContext.cs" />
     <Compile Include="DirectoryMetadataSource.cs" />
     <Compile Include="ExitCode.cs" />
-    <Compile Include="FileMetadata.cs" />
+    <Compile Include="Models\FileMetadata.cs" />
     <Compile Include="FileMetadataComparer.cs" />
     <Compile Include="FileMetadataExtensions.cs" />
     <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
-    <Compile Include="IComparisonReport.cs" />
-    <Compile Include="RelPathHashEqualityComparer.cs" />
-    <Compile Include="HashStream.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="IEnumerableOfTExtensions.cs" />
-    <Compile Include="IMetadataSource.cs" />
-    <Compile Include="IMetadataTarget.cs" />
-    <Compile Include="JsonHelpers.cs" />
+    <Compile Include="Report\IComparisonReport.cs" />
+    <Compile Include="Utility\RelPathHashEqualityComparer.cs" />
+    <Compile Include="Utility\HashStream.cs" />
+    <Compile Include="Utility\Helpers.cs" />
+    <Compile Include="Utility\IEnumerableOfTExtensions.cs" />
+    <Compile Include="Utility\IMetadataSource.cs" />
+    <Compile Include="Utility\IMetadataTarget.cs" />
+    <Compile Include="Utility\JsonHelpers.cs" />
     <Compile Include="JsonMetadataSource.cs" />
     <Compile Include="JsonMetadataTarget.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Utility\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ConsoleComparisonReport.cs" />
+    <Compile Include="Report\ConsoleComparisonReport.cs" />
+    <Compile Include="ViewModels\CompareViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

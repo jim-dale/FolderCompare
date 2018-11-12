@@ -15,9 +15,12 @@ namespace FolderCompare
             return Environment.ExpandEnvironmentVariables(path);
         }
 
-        public static string DisplayModeNamesAsString()
+        public static string EnumNamesAsString<T>(T defaultValue)
         {
-            return String.Join(", ", Enum.GetNames(typeof(DisplayMode)));
+            Type type = typeof(T);
+            string result = String.Join(", ", Enum.GetNames(type));
+            result += ". The default is " + Enum.GetName(type, defaultValue);
+            return result;
         }
 
         public static IMetadataSource GetMetadataSource(string path)
@@ -65,7 +68,7 @@ namespace FolderCompare
             return result;
         }
 
-        public static void GenerateHashOfContents(IEnumerable<FileMetadata> items, bool force)
+        public static void GenerateContentsHash(IEnumerable<FileMetadata> items, bool force)
         {
             var query = items;
 
@@ -82,11 +85,26 @@ namespace FolderCompare
             }
         }
 
-        public static bool GetShouldShowRow(DisplayMode outputType, FileMetadata leftItem, FileMetadata rightItem, int comparison)
+        public static bool GetShouldShowRow(DisplayMode displayMode, ContentsMode contentsMode, CompareViewModel viewModel)
+        {
+            var result = GetShouldShowRow(displayMode, viewModel.LeftItem, viewModel.RightItem, viewModel.Comparison);
+            if (result)
+            {
+                result = GetShouldShowRow(contentsMode, viewModel.LeftItem, viewModel.RightItem, viewModel.AreEqual);
+            }
+            return result;
+        }
+
+        public static int GetComparisonResultAsExitCode(int cmp)
+        {
+            return (cmp == 0) ? ExitCode.FoldersAreTheSame : ExitCode.FoldersAreDifferent;
+        }
+
+        private static bool GetShouldShowRow(DisplayMode mode, FileMetadata leftItem, FileMetadata rightItem, int comparison)
         {
             bool result = false;
 
-            switch (outputType)
+            switch (mode)
             {
                 case DisplayMode.Same:
                     result = (comparison == 0);
@@ -111,9 +129,27 @@ namespace FolderCompare
             return result;
         }
 
-        public static int GetComparisonResultAsExitCode(int cmp)
+        private static bool GetShouldShowRow(ContentsMode mode, FileMetadata leftItem, FileMetadata rightItem, bool? areEqual)
         {
-            return (cmp == 0) ? ExitCode.FoldersAreTheSame : ExitCode.FoldersAreDifferent;
+            bool result = false;
+
+            switch (mode)
+            {
+                case ContentsMode.Same:
+                    result = (areEqual.HasValue && areEqual.Value == true);
+                    break;
+                case ContentsMode.Differences:
+                    result = (areEqual.HasValue && areEqual.Value == false);
+                    break;
+                case ContentsMode.All:
+                    result = true;
+                    break;
+                case ContentsMode.None:
+                default:
+                    break;
+            }
+
+            return result;
         }
     }
 }

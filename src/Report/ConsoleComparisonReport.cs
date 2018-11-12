@@ -11,7 +11,8 @@ namespace FolderCompare
         private const string DateHeader = "Modified";
         private const string LengthHeader = "Size";
 
-        private readonly DisplayMode _outputType;
+        private readonly DisplayMode _displayMode;
+        private readonly ContentsMode _contentsMode;
         private readonly int _deviceWidth;
         private readonly int _majorColumnWidth;
         private readonly int _pathMaxLen;
@@ -20,11 +21,12 @@ namespace FolderCompare
         private string _leftSource;
         private string _rightSource;
 
-        public ConsoleComparisonReport(DisplayMode outputType, int deviceWidth)
+        public ConsoleComparisonReport(DisplayMode displayMode, ContentsMode contentsMode, int deviceWidth)
         {
-            _outputType = outputType;
-
+            _displayMode = displayMode;
+            _contentsMode = contentsMode;
             _deviceWidth = deviceWidth;
+
             _majorColumnWidth = GetMaxColumnWidth(deviceWidth);
             _pathMaxLen = _majorColumnWidth - DateStrLength - LengthStrLength;
         }
@@ -37,9 +39,9 @@ namespace FolderCompare
             _showHeader = true;
         }
 
-        public void OutputRow(FileMetadata leftItem, FileMetadata rightItem, int comparison, bool? areEqual = null)
+        public void OutputRow(CompareViewModel viewModel)
         {
-            if (Helpers.GetShouldShowRow(_outputType, leftItem, rightItem, comparison))
+            if (Helpers.GetShouldShowRow(_displayMode, _contentsMode, viewModel))
             {
                 if (_showHeader)
                 {
@@ -49,7 +51,7 @@ namespace FolderCompare
                 //ConsoleColor colour = Console.ForegroundColor;
                 //Console.ForegroundColor = colour;
                 //var text = GetPathsAsTableRow(Console.WindowWidth, leftItem?.RelativePath, rightItem?.RelativePath);
-                var text = GetAsRow(leftItem, rightItem, areEqual);
+                var text = GetAsRow(viewModel.LeftItem, viewModel.RightItem, viewModel.AreEqual);
 
                 Console.WriteLine(text);
             }
@@ -65,7 +67,9 @@ namespace FolderCompare
             string str2 = GetAsColumn(p2, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
 
             string row = JoinLeftAndRightColumns(str1, str2);
+
             Console.WriteLine(row);
+            Console.WriteLine(new String('-', _deviceWidth - 1));
         }
 
         public string GetAsRow(FileMetadata item1, FileMetadata item2, bool? areEqual)

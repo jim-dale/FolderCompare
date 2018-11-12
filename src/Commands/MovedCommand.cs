@@ -1,10 +1,9 @@
 ﻿
 namespace FolderCompare
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
+    using System;
+    using System.Linq;
 
     /// <summary>
     /// Get items with same ContentsHash
@@ -13,24 +12,24 @@ namespace FolderCompare
     /// </summary>
     public class MovedCommand
     {
-        public CommandOption LeftPath { get; private set; }
-        public CommandOption RightPath { get; private set; }
-        public CommandOption<DisplayMode> Display { get; private set; }
+        private const DisplayMode DefaultDisplayMode = DisplayMode.Same;
+
+        public CommandOption LeftPathOption { get; private set; }
+        public CommandOption RightPathOption { get; private set; }
 
         public MovedContext Context { get; private set; }
 
         public void Configure(CommandLineApplication<MovedCommand> cmd)
         {
-            LeftPath = cmd.Option("-l|--left <PATH>", "The left folder or catalogue to compare.", CommandOptionType.SingleValue)
+            cmd.HelpOption("-?|--help");
+
+            LeftPathOption = cmd.Option("-l|--left <PATH>", "The left folder or catalogue to compare.", CommandOptionType.SingleValue)
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 
-            RightPath = cmd.Option("-r|--right <PATH>", "The right folder or catalogue to compare.", CommandOptionType.SingleValue)
+            RightPathOption = cmd.Option("-r|--right <PATH>", "The right folder or catalogue to compare.", CommandOptionType.SingleValue)
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
-
-            Display = cmd.Option<DisplayMode>("-d|--displayMode <MODE>", Helpers.DisplayModeNamesAsString(), CommandOptionType.SingleValue)
-                .Accepts(v => v.Enum<DisplayMode>(true));
 
             cmd.OnExecute((Func<int>)OnExecute);
         }
@@ -39,15 +38,14 @@ namespace FolderCompare
         {
             Context = new MovedContext
             {
-                LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPath.Value())),
-                RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPath.Value())),
-                OutputType = DisplayMode.Same,
+                LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value())),
+                RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value())),
 
                 EqualityComparer = new RelPathHashEqualityComparer(),
                 ContentsComparer = new ContentsHashEqualityComparer(),
-            };
 
-            Context.Report = new ConsoleComparisonReport(Context.OutputType, Console.WindowWidth);
+                Report = new ConsoleComparisonReport(DisplayMode.All, ContentsMode.All, Console.WindowWidth),
+            };
 
             // Get all metadata entries
             var leftItems = Context.LeftSource.GetAll();
@@ -61,119 +59,25 @@ namespace FolderCompare
             Context.LeftItems = Context.LeftItems.RemoveDuplicates(i => i.ContentsHash);
             Context.RightItems = Context.RightItems.RemoveDuplicates(i => i.ContentsHash);
 
-            int combined = 0;
+            var items = from item in Context.LeftItems
+                        join other in Context.RightItems on item.ContentsHash.ToLowerInvariant() equals other.ContentsHash.ToLowerInvariant()
+                        select new CompareViewModel
+                        {
+                            LeftItem = item,
+                            RightItem = other,
+                        };
 
-            var items = Context.LeftItems.FullOuterJoin(Context.RightItems, Context.ContentsComparer);
             if (items.Any())
             {
                 Context.Report.SetSources(Context.LeftSource.Source, Context.RightSource.Source);
 
                 foreach (var item in items)
                 {
-                    int comparison = String.Compare(item.Item1?.ContentsHash, item.Item2?.ContentsHash, StringComparison.InvariantCultureIgnoreCase);
-                    combined |= comparison;
-
-                    Context.Report.OutputRow(item.Item1, item.Item2, comparison, null);
+                    Context.Report.OutputRow(item);
                 }
             }
 
-            return Helpers.GetComparisonResultAsExitCode(combined);
-        }
-
-        private static void DumpDuplicates(IEnumerable<FileMetadata> items, string collectionName)
-        {
-            var duplicates = items.GetDuplicates(i => i.ContentsHash);
-
-            Console.WriteLine("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
-            Console.WriteLine($"{collectionName} has {items.Count()} items, of which there are {duplicates.Count()} duplicates");
-            Console.WriteLine();
-
-            foreach (var g in duplicates)
-            {
-                Console.WriteLine("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +");
-                foreach (var item in g)
-                {
-                    Console.WriteLine(item.RelativePath);
-                }
-
-            }
+            return ExitCode.FoldersAreTheSame;
         }
     }
 }
-
-
-
-//var leftOuterJoin = from left in Context.LeftItems
-//                    join right in Context.RightItems on left.ContentsHash equals right.ContentsHash into gj
-//                    from subRight in gj.DefaultIfEmpty()
-//                    select new
-//                    {
-//                        LeftItem = left,
-//                        RightItem = subRight
-//                    };
-
-//foreach (var item in leftOuterJoin.Where(i => i.RightItem is null))
-//{
-//    Console.WriteLine($"{item.LeftItem?.RelativePath}, {item.RightItem?.RelativePath}");
-//}
-
-//Console.WriteLine();
-//Console.WriteLine("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +");
-//Console.WriteLine();
-
-
-
-
-//var rightOuterJoin = from right in Context.RightItems
-//                    join left in Context.LeftItems on right.ContentsHash equals left.ContentsHash into gj
-//                    from subLeft in gj.DefaultIfEmpty()
-//                    select new
-//                    {
-//                        LeftItem = subLeft,
-//                        RightItem = right
-//                    };
-
-
-
-//foreach (var item in rightOuterJoin.Where(i => i.LeftItem is null))
-//{
-//    Console.WriteLine($"{item.LeftItem?.RelativePath}, {item.RightItem?.RelativePath}");
-//}
-
-//Console.WriteLine();
-
-//var dupLeft = Context.RightItems.GetDuplicates(i => i.ContentsHash);
-//if (dupLeft.Any())
-//{
-//    Console.WriteLine($"{dupLeft.Count()}");
-//    Console.WriteLine();
-
-//    foreach (var g in dupLeft)
-//    {
-//        Console.WriteLine("+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +");
-//        foreach (var item in g)
-//        {
-//            Console.WriteLine(item.RelativePath);
-//        }
-//    }
-//}
-//var Ljoin = from emp in ListOfEmployees
-//            join proj in ListOfProject
-//               on emp.ProjectID equals proj.ProjectID into JoinedEmpDept
-//            from proj in JoinedEmpDept.DefaultIfEmpty()
-//            select new
-//            {
-//                EmployeeName = emp.Name,
-//                ProjectName = proj != null ? proj.ProjectName : null
-//            };
-
-////Right outer join
-//var RJoin = from proj in ListOfProject
-//            join employee in ListOfEmployees
-//            on proj.ProjectID equals employee.ProjectID into joinDeptEmp
-//            from employee in joinDeptEmp.DefaultIfEmpty()
-//            select new
-//            {
-//                EmployeeName = employee != null ? employee.Name : null,
-//                ProjectName = proj.ProjectName
-//            };

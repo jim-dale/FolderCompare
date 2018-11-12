@@ -8,7 +8,8 @@ namespace FolderCompare
         // Set by command line parameters
         public IMetadataSource LeftSource { get; set; }
         public IMetadataSource RightSource { get; set; }
-        public DisplayMode OutputType { get; set; }
+        public DisplayMode DisplayMode { get; set; }
+        public ContentsMode ContentsMode { get; set; }
 
         // Set at runtime
         public IComparer<FileMetadata> Comparer { get; set; }
