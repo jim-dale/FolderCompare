@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ChangesCommand.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
     <Compile Include="CommandContexts\CompareContext.cs" />
     <Compile Include="ContentsMode.cs" />
@@ -55,11 +56,12 @@
     <Compile Include="DirectoryMetadataSource.cs" />
     <Compile Include="ExitCode.cs" />
     <Compile Include="Models\FileMetadata.cs" />
-    <Compile Include="FileMetadataComparer.cs" />
+    <Compile Include="Utility\FileMetadataComparer.cs" />
     <Compile Include="FileMetadataExtensions.cs" />
     <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="Report\IComparisonReport.cs" />
+    <Compile Include="Utility\FileMetadataEqualityComparer.cs" />
     <Compile Include="Utility\RelPathHashEqualityComparer.cs" />
     <Compile Include="Utility\HashStream.cs" />
     <Compile Include="Utility\Helpers.cs" />

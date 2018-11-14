@@ -60,7 +60,7 @@ namespace FolderCompare
 
             int combined = 0;
 
-            var items = Join(Context.LeftItems, Context.RightItems, Context.EqualityComparer);
+            var items = Join(Context.LeftItems, Context.RightItems);
             if (items.Any())
             {
                 Context.Report.SetSources(Context.LeftSource.Source, Context.RightSource.Source);
@@ -76,27 +76,27 @@ namespace FolderCompare
             return Helpers.GetComparisonResultAsExitCode(combined);
         }
 
-        private IEnumerable<CompareViewModel> Join(IEnumerable<FileMetadata> items1, IEnumerable<FileMetadata> items2, IEqualityComparer<FileMetadata> comparer)
+        private IEnumerable<CompareViewModel> Join(IEnumerable<FileMetadata> leftItems, IEnumerable<FileMetadata> rightItems)
         {
-            var items = items1.Union(items2, comparer);
+            var items = leftItems.Union(rightItems, Context.EqualityComparer);
 
             foreach (var item in items)
             {
-                var item1 = items1.SingleOrDefault(i => comparer.Equals(i, item));
-                var item2 = items2.SingleOrDefault(i => comparer.Equals(i, item));
+                var leftItem = leftItems.SingleOrDefault(i => Context.EqualityComparer.Equals(i, item));
+                var rightItem = rightItems.SingleOrDefault(i => Context.EqualityComparer.Equals(i, item));
 
-                int comparison = Context.Comparer.Compare(item1, item2);
+                int comparison = Context.Comparer.Compare(leftItem, rightItem);
 
                 bool? areEqual = null;
-                if (item1?.ContentsHash != null && item2?.ContentsHash != null && Context.ContentsComparer != null)
+                if (leftItem?.ContentsHash != null && rightItem?.ContentsHash != null)
                 {
-                    areEqual = Context.ContentsComparer.Equals(item1, item2);
+                    areEqual = Context.ContentsComparer.Equals(leftItem, rightItem);
                 }
 
                 yield return new CompareViewModel
                 {
-                    LeftItem = item1,
-                    RightItem = item2,
+                    LeftItem = leftItem,
+                    RightItem = rightItem,
                     Comparison = comparison,
                     AreEqual = areEqual
                 };
