@@ -44,7 +44,7 @@ namespace FolderCompare
                 EqualityComparer = new RelPathHashEqualityComparer(),
                 ContentsComparer = new ContentsHashEqualityComparer(),
 
-                Report = new ConsoleComparisonReport(DisplayMode.All, ContentsMode.All, Console.WindowWidth),
+                Report = new ConsoleComparisonReport(DisplayMode.All, ContentsMode.All),
             };
 
             // Get all metadata entries
@@ -59,13 +59,9 @@ namespace FolderCompare
             Context.LeftItems = Context.LeftItems.RemoveDuplicates(i => i.ContentsHash);
             Context.RightItems = Context.RightItems.RemoveDuplicates(i => i.ContentsHash);
 
-            var items = from item in Context.LeftItems
-                        join other in Context.RightItems on item.ContentsHash.ToLowerInvariant() equals other.ContentsHash.ToLowerInvariant()
-                        select new CompareViewModel
-                        {
-                            LeftItem = item,
-                            RightItem = other,
-                        };
+            var items = from leftItem in Context.LeftItems
+                        join rightItem in Context.RightItems on leftItem.ContentsHash.ToLowerInvariant() equals rightItem.ContentsHash.ToLowerInvariant()
+                        select Helpers.CreateViewModel(leftItem, rightItem, new FileMetadataComparer(), Context.ContentsComparer);
 
             if (items.Any())
             {

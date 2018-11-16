@@ -49,6 +49,20 @@ namespace FolderCompare
             return result;
         }
 
+        public static CompareViewModel CreateViewModel(FileMetadata leftItem, FileMetadata rightItem, IComparer<FileMetadata> comparer, IEqualityComparer<FileMetadata> equalityComparer)
+        {
+            int comparison = comparer.Compare(leftItem, rightItem);
+            bool? areEqual = (leftItem is null || rightItem is null) ? (bool?)null : equalityComparer.Equals(leftItem, rightItem);
+
+            return new CompareViewModel
+            {
+                LeftItem = leftItem,
+                RightItem = rightItem,
+                Comparison = comparison,
+                AreEqual = areEqual
+            };
+        }
+
         public static FileMetadata CreateFileMetadata(DirectoryInfo directoryInfo, FileInfo fileInfo)
         {
             var rp = directoryInfo.GetRelativePathTo(fileInfo);

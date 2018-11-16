@@ -49,6 +49,7 @@
     <Compile Include="ContentsMode.cs" />
     <Compile Include="Commands\MovedCommand.cs" />
     <Compile Include="CommandContexts\MovedContext.cs" />
+    <Compile Include="Report\Justification.cs" />
     <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
     <Compile Include="Commands\CreateCommand.cs" />

@@ -53,7 +53,7 @@ namespace FolderCompare
                 ContentsComparer = new ContentsHashEqualityComparer(),
             };
 
-            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode, Console.WindowWidth);
+            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode);
 
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();

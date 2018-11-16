@@ -72,12 +72,12 @@ namespace FolderCompare
                 ContentsComparer = new ContentsHashEqualityComparer(),
             };
 
-            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode, Console.WindowWidth);
+            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode);
 
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();
 
-            int combined = 0;
+            var exitCode = ExitCode.FoldersAreTheSame;
 
             // Exists on both sides but different FileMetadata
             // Moved RelPath different but ContentsHash the same (excluding duplicates)
@@ -117,46 +117,27 @@ namespace FolderCompare
                 {
                     rightConsumed.Add(rightItem);
                 }
-                items.Add(CreateViewModel(leftItem, rightItem));
+                items.Add(Helpers.CreateViewModel(leftItem, rightItem, Context.Comparer, Context.ContentsComparer));
             }
             var rightRemaining = rightItems.Except(rightConsumed);
             foreach (var rightItem in rightRemaining)
             {
-                items.Add(CreateViewModel(null, rightItem));
+                items.Add(Helpers.CreateViewModel(null, rightItem, Context.Comparer, Context.ContentsComparer));
             }
 
             if (items.Any())
             {
+                exitCode = ExitCode.FoldersAreDifferent;
+
                 Context.Report.SetSources(Context.LeftSource.Source, Context.RightSource.Source);
 
                 foreach (var item in items)
                 {
                     Context.Report.OutputRow(item);
-
-                    combined |= item.Comparison;
                 }
             }
 
-            return Helpers.GetComparisonResultAsExitCode(combined);
-        }
-
-        private CompareViewModel CreateViewModel(FileMetadata leftItem, FileMetadata rightItem)
-        {
-            int comparison = Context.Comparer.Compare(leftItem, rightItem);
-
-            bool? areEqual = null;
-            if (leftItem?.ContentsHash != null && rightItem?.ContentsHash != null)
-            {
-                areEqual = Context.ContentsComparer.Equals(leftItem, rightItem);
-            }
-
-            return new CompareViewModel
-            {
-                LeftItem = leftItem,
-                RightItem = rightItem,
-                Comparison = comparison,
-                AreEqual = areEqual
-            };
+            return exitCode;
         }
     }
 }

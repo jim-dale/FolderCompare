@@ -4,43 +4,65 @@ namespace FolderCompare
     using System;
     using System.Text;
 
-    public class ConsoleComparisonReport : IComparisonReport
+    public partial class ConsoleComparisonReport : IComparisonReport
     {
-        private const int DateStrLength = 22;
-        private const int LengthStrLength = 12;
+        private const int DateStrLength = 20;
+        private const int SizeStrLength = 10;
+        private const int ColumnSeparatorWidth = 3;
+        private const int NumberOfFields = 3;
         private const string DateHeader = "Modified";
-        private const string LengthHeader = "Size";
+        private const string SizeHeader = "Size";
+        private const char HorizontalLineChar = '\u2500';
+        private const char VerticalLineChar = '\u2502';
+        private const char DownHorizontalChar = '\u252C';
+        private const char VerticalHorizontalChar = '\u253C';
+        private const char DoubleVerticalChar = '\u2551';
+        private const char DoubleVertSingleHoriz = '\u256B';
+
+        private const char PaddingChar = ' ';
+        private const char EqualChar = '=';
+        private const char NotEqualChar = '\u2260';
 
         private readonly DisplayMode _displayMode;
         private readonly ContentsMode _contentsMode;
-        private readonly int _deviceWidth;
-        private readonly int _majorColumnWidth;
-        private readonly int _pathMaxLen;
 
-        private bool _showHeader = false;
         private string _leftSource;
         private string _rightSource;
+        private int _deviceWidth;
+        private bool _showHeader = false;
+        private int _majorColumnWidth;
+        private int _pathColumnWidth;
+        private int _dateColumnWidth;
+        private int _sizeColumnWidth;
 
-        public ConsoleComparisonReport(DisplayMode displayMode, ContentsMode contentsMode, int deviceWidth)
+        private int _pathMaxLength;
+        private int _dateStrMaxLength = 20;
+        private int _sizeStrMaxLength = 10;
+
+        private class RowViewModel
+        {
+            public ConsoleColor Colour { get; set; }
+            public string Text { get; set; }
+        }
+
+        public ConsoleComparisonReport(DisplayMode displayMode, ContentsMode contentsMode)
         {
             _displayMode = displayMode;
             _contentsMode = contentsMode;
-            _deviceWidth = deviceWidth;
 
-            _majorColumnWidth = GetMaxColumnWidth(deviceWidth);
-            _pathMaxLen = _majorColumnWidth - DateStrLength - LengthStrLength;
+            _showHeader = true;
         }
 
         public void SetSources(string leftSource, string rightSource)
         {
             _leftSource = leftSource;
             _rightSource = rightSource;
-
-            _showHeader = true;
         }
 
         public void OutputRow(CompareViewModel viewModel)
         {
+            CalculateWidths();
+
             if (Helpers.GetShouldShowRow(_displayMode, _contentsMode, viewModel))
             {
                 if (_showHeader)
@@ -48,93 +70,147 @@ namespace FolderCompare
                     OutputHeader();
                     _showHeader = false;
                 }
-                //ConsoleColor colour = Console.ForegroundColor;
-                //Console.ForegroundColor = colour;
-                //var text = GetPathsAsTableRow(Console.WindowWidth, leftItem?.RelativePath, rightItem?.RelativePath);
-                var text = GetAsRow(viewModel.LeftItem, viewModel.RightItem, viewModel.AreEqual);
 
-                Console.WriteLine(text);
+                Console.Write(GetPathAsJustifiedString(viewModel.LeftItem?.RelativePath, Justification.Left));
+                Console.Write(VerticalLineChar);
+                Console.Write(GetDateAsJustifiedString(viewModel.LeftItem?.LastWriteTimeUtc, Justification.Left));
+                Console.Write(VerticalLineChar);
+                Console.Write(GetSizeAsJustifiedString(viewModel.LeftItem?.Length, Justification.Right));
+
+                Console.Write(GetEqualitySeparator(viewModel.AreEqual));
+
+                Console.Write(GetPathAsJustifiedString(viewModel.RightItem?.RelativePath, Justification.Left));
+                Console.Write(VerticalLineChar);
+                Console.Write(GetDateAsJustifiedString(viewModel.RightItem?.LastWriteTimeUtc, Justification.Left));
+                Console.Write(VerticalLineChar);
+                Console.Write(GetSizeAsJustifiedString(viewModel.RightItem?.Length, Justification.Right));
+
+                Console.WriteLine();
             }
             Console.ResetColor();
         }
 
         private void OutputHeader()
         {
-            string p1 = NativeMethods.CompactPath(_leftSource, _pathMaxLen);
-            string p2 = NativeMethods.CompactPath(_rightSource, _pathMaxLen);
+            CalculateWidths();
 
-            string str1 = GetAsColumn(p1, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
-            string str2 = GetAsColumn(p2, _pathMaxLen, DateHeader, DateStrLength, LengthHeader, LengthStrLength);
+            Console.Write(GetPathAsJustifiedString(_leftSource, Justification.Left));
+            Console.Write(VerticalLineChar);
+            Console.Write(JustifyString(DateHeader, _dateColumnWidth, Justification.Left));
+            Console.Write(VerticalLineChar);
+            Console.Write(JustifyString(SizeHeader, _sizeColumnWidth, Justification.Right));
 
-            string row = JoinLeftAndRightColumns(str1, str2);
+            Console.Write(GetEqualitySeparator(null));
 
-            Console.WriteLine(row);
-            Console.WriteLine(new String('-', _deviceWidth - 1));
+            Console.Write(GetPathAsJustifiedString(_rightSource, Justification.Left));
+            Console.Write(VerticalLineChar);
+            Console.Write(JustifyString(DateHeader, _dateColumnWidth, Justification.Left));
+            Console.Write(VerticalLineChar);
+            Console.Write(JustifyString(SizeHeader, _sizeColumnWidth, Justification.Right));
+
+            Console.WriteLine();
+
+            DrawHorizontalSeparator();
         }
 
-        public string GetAsRow(FileMetadata item1, FileMetadata item2, bool? areEqual)
+        private void DrawHorizontalSeparator()
         {
-            string part1 = GetAsColumn(item1);
-            string part2 = GetAsColumn(item2);
+            RepeatCharacter(HorizontalLineChar, _pathColumnWidth);
+            Console.Write(VerticalHorizontalChar);
+            RepeatCharacter(HorizontalLineChar, _dateColumnWidth);
+            Console.Write(VerticalHorizontalChar);
+            RepeatCharacter(HorizontalLineChar, _sizeColumnWidth);
 
-            return JoinLeftAndRightColumns(part1, part2, areEqual);
+            Console.Write(HorizontalLineChar);
+            Console.Write(DoubleVertSingleHoriz);
+            Console.Write(HorizontalLineChar);
+
+            RepeatCharacter(HorizontalLineChar, _pathColumnWidth);
+            Console.Write(VerticalHorizontalChar);
+            RepeatCharacter(HorizontalLineChar, _dateColumnWidth);
+            Console.Write(VerticalHorizontalChar);
+            RepeatCharacter(HorizontalLineChar, _sizeColumnWidth);
+            Console.WriteLine();
         }
 
-        public string GetAsColumn(FileMetadata item)
+        private string GetPathAsJustifiedString(string value, Justification justification)
         {
             string result = String.Empty;
-
-            if (item != null)
+            if (String.IsNullOrEmpty(value) == false)
             {
-                string dateStr = item.LastWriteTimeUtc.ToString("u");
-                string lengthStr = NativeMethods.FormatByteSizeEx(item.Length, LengthStrLength);
-                string path = NativeMethods.CompactPath(item.RelativePath, _pathMaxLen);
-
-                result = GetAsColumn(path, _pathMaxLen, dateStr, DateStrLength, lengthStr, LengthStrLength);
+                result = NativeMethods.CompactPath(value, _pathMaxLength);
             }
+            result = JustifyString(result, _pathColumnWidth, justification);
 
             return result;
         }
 
-        private string GetAsColumn(string str1, int str1MaxLen, string str2, int str2MaxLen, string str3, int str3MaxLen)
+        private string GetDateAsJustifiedString(DateTime? value, Justification justification)
         {
-            StringBuilder sb = new StringBuilder(_majorColumnWidth);
+            string result = String.Empty;
+            if (value.HasValue)
+            {
+                result = value.Value.ToString("u");
+            }
+            result = JustifyString(result, _dateColumnWidth, justification);
 
-            sb.AppendFormat(str1);
-            sb.Append(' ', str1MaxLen - str1.Length);   // Pad left
-
-            sb.Append(' ', str2MaxLen - str2.Length);   // Pad right
-            sb.Append(str2);
-
-            sb.Append(' ', str3MaxLen - str3.Length);   // Pad right
-            sb.Append(str3);
-
-            return sb.ToString();
+            return result;
         }
 
-        private string JoinLeftAndRightColumns(string part1, string part2, bool? areEqual = null)
+        private string GetSizeAsJustifiedString(long? value, Justification justification)
         {
-            StringBuilder sb = new StringBuilder(_deviceWidth);
+            string result = String.Empty;
+            if (value.HasValue)
+            {
+                result = NativeMethods.FormatByteSizeEx(value.Value, _sizeStrMaxLength);
+            }
+            result = JustifyString(result, _sizeColumnWidth, justification);
 
-            sb.Append(part1);
-            sb.Append(' ', _majorColumnWidth - part1.Length);
-            sb.Append(GetEqualitySeparator(areEqual));
-            sb.Append(part2);
+            return result;
+        }
+
+        private string JustifyString(string str, int maxWidth, Justification justification)
+        {
+            StringBuilder sb = new StringBuilder(maxWidth);
+
+            int remaining = maxWidth - str.Length;
+            int leftPadding = 0;
+            int rightPadding = 0;
+
+            if (remaining > 0)
+            {
+                if (justification == Justification.Right)
+                {
+                    leftPadding = remaining;
+                }
+                else if (justification == Justification.Left)
+                {
+                    rightPadding = remaining;
+                }
+                else
+                {
+                    leftPadding = (remaining + 1) / 2;
+                    rightPadding = remaining - leftPadding;
+                }
+            }
+            sb.Append(PaddingChar, leftPadding);
+            sb.Append(str);
+            sb.Append(PaddingChar, rightPadding);
 
             return sb.ToString();
         }
 
         private static string GetEqualitySeparator(bool? areEqual)
         {
-            string result = " | ";
+            string result = " " + DoubleVerticalChar + " ";
 
             switch (areEqual)
             {
                 case false:
-                    result = " \u2260 ";
+                    result = " " + NotEqualChar + " ";
                     break;
                 case true:
-                    result = " = ";
+                    result = " " + EqualChar + " ";
                     break;
                 case null:
                 default:
@@ -143,14 +219,34 @@ namespace FolderCompare
             return result;
         }
 
+        private void CalculateWidths()
+        {
+            _deviceWidth = Console.BufferWidth;
+            _majorColumnWidth = GetMajorColumnWidth(_deviceWidth);
+            _dateStrMaxLength = DateStrLength;
+            _sizeStrMaxLength = SizeStrLength;
+            _dateColumnWidth = _dateStrMaxLength;
+            _sizeColumnWidth = _sizeStrMaxLength + 1;
+            _pathColumnWidth = _majorColumnWidth - _dateColumnWidth - _sizeColumnWidth - (NumberOfFields - 1);
+            _pathMaxLength = _pathColumnWidth - 1;
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="width"></param>
         /// <returns></returns>
-        private static int GetMaxColumnWidth(int width)
+        private static int GetMajorColumnWidth(int width)
         {
-            return (width - 3) / 2;
+            return (width - ColumnSeparatorWidth) / 2;
+        }
+
+        private static void RepeatCharacter(char ch, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Console.Write(ch);
+            }
         }
     }
 }

@@ -13,9 +13,7 @@ namespace FolderCompare
             var app = new CommandLineApplication<FolderCompareApp>();
             app.Model.Configure(app);
 
-            var exitCode = app.Execute(args);
-            return exitCode;
+            return app.Execute(args);
         }
     }
 }
-
