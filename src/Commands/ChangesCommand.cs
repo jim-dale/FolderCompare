@@ -2,80 +2,8 @@
 namespace FolderCompare
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
-
-    public class FileMetadataLookup
-    {
-        private readonly ILookup<string, FileMetadata> _relPathLookup;
-        private readonly ILookup<string, FileMetadata> _contentsLookup;
-
-        public FileMetadataLookup(IEnumerable<FileMetadata> items)
-        {
-            _relPathLookup = items.ToLookup(i => i.RelativePathHash, StringComparer.InvariantCultureIgnoreCase);
-            _contentsLookup = items.ToLookup(i => i.ContentsHash, StringComparer.InvariantCultureIgnoreCase);
-        }
-
-        public IEnumerable<FileMetadata> FindMatches(FileMetadata item)
-        {
-            var result = _relPathLookup[item.RelativePathHash];
-            if (result.FirstOrDefault() is null)
-            {
-                result = _contentsLookup[item.ContentsHash];
-            }
-            return result;
-        }
-    }
-
-    public class Changes
-    {
-        /// <summary>
-        /// Exists on both sides but different FileMetadata
-        /// Moved RelPath different but ContentsHash the same (excluding duplicates)
-        /// Duplicates by ContentsHash
-        /// Orphan - exists only on one side
-        /// </summary>
-        /// <param name="leftSource"></param>
-        /// <param name="rightSource"></param>
-        /// <returns></returns>
-
-        public IEnumerable<CompareViewModel> GetItems(IMetadataSource leftSource, IMetadataSource rightSource)
-        {
-            var leftItems = leftSource.GetAll();
-            var rightItems = rightSource.GetAll();
-
-            // Create lookup to speed up matching items from left to right
-            var lookup = new FileMetadataLookup(rightItems);
-
-            List<FileMetadata> rightMatched = new List<FileMetadata>();
-            List<CompareViewModel> items = new List<CompareViewModel>();
-
-            foreach (var leftItem in leftItems)
-            {
-                var rightItem = default(FileMetadata);
-
-                var matches = lookup.FindMatches(leftItem);
-                if (matches.Count() == 1)
-                {
-                    rightItem = matches.Single();
-                }
-                if (rightItem != null)
-                {
-                    rightMatched.Add(rightItem);
-                }
-                items.Add(Helpers.CreateViewModel(leftItem, rightItem));
-            }
-            var rightRemaining = rightItems.Except(rightMatched);
-            foreach (var rightItem in rightRemaining)
-            {
-                items.Add(Helpers.CreateViewModel(null, rightItem));
-            }
-
-            return items;
-        }
-    }
-
 
     public class ChangesCommand
     {
@@ -110,7 +38,7 @@ namespace FolderCompare
 
         private int OnExecute()
         {
-            var changes = new Changes();
+            var changes = new ChangesContext();
 
             var leftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value()));
             var rightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value()));

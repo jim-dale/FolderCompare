@@ -44,8 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ChangesCommand.cs" />
+    <Compile Include="CommandContexts\ChangesContext.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
     <Compile Include="CommandContexts\CompareContext.cs" />
+    <Compile Include="Utility\FileMetadataLookup.cs" />
     <Compile Include="Commands\MovedCommand.cs" />
     <Compile Include="CommandContexts\MovedContext.cs" />
     <Compile Include="ContentsMode.cs" />
