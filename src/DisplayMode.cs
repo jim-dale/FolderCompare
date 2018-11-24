@@ -7,7 +7,10 @@ namespace FolderCompare
         Same,
         LeftOnly,
         RightOnly,
-        Differences,
+        Different,
+        Moved,
+        Modified,
+        Size,
         All,
     }
 }

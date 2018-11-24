@@ -61,7 +61,7 @@ namespace FolderCompare
 
             var items = from leftItem in Context.LeftItems
                         join rightItem in Context.RightItems on leftItem.ContentsHash.ToLowerInvariant() equals rightItem.ContentsHash.ToLowerInvariant()
-                        select Helpers.CreateViewModel(leftItem, rightItem, new FileMetadataComparer(), Context.ContentsComparer);
+                        select Helpers.CreateViewModel(leftItem, rightItem);
 
             if (items.Any())
             {

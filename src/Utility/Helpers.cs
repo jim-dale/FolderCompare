@@ -49,17 +49,20 @@ namespace FolderCompare
             return result;
         }
 
-        public static CompareViewModel CreateViewModel(FileMetadata leftItem, FileMetadata rightItem, IComparer<FileMetadata> comparer, IEqualityComparer<FileMetadata> equalityComparer)
+        public static CompareViewModel CreateViewModel(FileMetadata leftItem, FileMetadata rightItem)
         {
-            int comparison = comparer.Compare(leftItem, rightItem);
-            bool? areEqual = (leftItem is null || rightItem is null) ? (bool?)null : equalityComparer.Equals(leftItem, rightItem);
+            IComparer<string> hashComparer = StringComparer.InvariantCultureIgnoreCase;
+            IComparer<DateTime?> dateComparer = Comparer<DateTime?>.Default;
+            IComparer<long?> sizeComparer = Comparer<long?>.Default;
 
             return new CompareViewModel
             {
                 LeftItem = leftItem,
                 RightItem = rightItem,
-                Comparison = comparison,
-                AreEqual = areEqual
+                RelPathComparison = hashComparer.Compare(leftItem?.RelativePath, rightItem?.RelativePath),
+                LastWriteComparison = dateComparer.Compare(leftItem?.LastWriteTimeUtc, rightItem?.LastWriteTimeUtc),
+                SizeComparison = sizeComparer.Compare(leftItem?.Length, rightItem?.Length),
+                ContentsComparison = hashComparer.Compare(leftItem?.ContentsHash, rightItem?.ContentsHash),
             };
         }
 
@@ -76,7 +79,7 @@ namespace FolderCompare
                 LastWriteTimeUtc = fileInfo.LastWriteTimeUtc,
                 OriginalPath = fileInfo.FullName,
                 RelativePath = rp,
-                RelativePathHash = HashStream.GetStringHashSHA512(rp.ToLowerInvariant()),
+                RelativePathHash = HashHelpers.GetStringHashSHA512(rp.ToLowerInvariant()),
             };
 
             return result;
@@ -95,18 +98,8 @@ namespace FolderCompare
 
             foreach (var item in query)
             {
-                item.ContentsHash = HashStream.GetFileHashSHA512(item.OriginalPath);
+                item.ContentsHash = HashHelpers.GetFileHashSHA512(item.OriginalPath);
             }
-        }
-
-        public static bool GetShouldShowRow(DisplayMode displayMode, ContentsMode contentsMode, CompareViewModel viewModel)
-        {
-            var result = GetShouldShowRow(displayMode, viewModel.LeftItem, viewModel.RightItem, viewModel.Comparison);
-            if (result)
-            {
-                result = GetShouldShowRow(contentsMode, viewModel.LeftItem, viewModel.RightItem, viewModel.AreEqual);
-            }
-            return result;
         }
 
         public static int GetComparisonResultAsExitCode(int cmp)
@@ -114,51 +107,37 @@ namespace FolderCompare
             return (cmp == 0) ? ExitCode.FoldersAreTheSame : ExitCode.FoldersAreDifferent;
         }
 
-        private static bool GetShouldShowRow(DisplayMode mode, FileMetadata leftItem, FileMetadata rightItem, int comparison)
+        public static bool GetShouldShowRow(DisplayMode mode, CompareViewModel viewModel)
         {
             bool result = false;
 
             switch (mode)
             {
                 case DisplayMode.Same:
-                    result = (comparison == 0);
+                    result = (viewModel.ContentsComparison == 0 && viewModel.RelPathComparison == 0 && viewModel.LastWriteComparison == 0 && viewModel.SizeComparison == 0);
                     break;
                 case DisplayMode.LeftOnly:
-                    result = (comparison > 0);
+                    result = (viewModel.RightItem is null);
                     break;
                 case DisplayMode.RightOnly:
-                    result = (comparison < 0);
+                    result = (viewModel.LeftItem is null);
                     break;
-                case DisplayMode.Differences:
-                    result = (comparison != 0);
+                case DisplayMode.Different:
+                    result = (viewModel.ContentsComparison != 0 || viewModel.RelPathComparison != 0 || viewModel.LastWriteComparison != 0 || viewModel.SizeComparison != 0);
+                    break;
+                case DisplayMode.Moved:
+                    result = (viewModel.ContentsComparison == 0 && viewModel.RelPathComparison != 0);
+                    break;
+                case DisplayMode.Modified:
+                    result = (viewModel.LastWriteComparison != 0);
+                    break;
+                case DisplayMode.Size:
+                    result = (viewModel.SizeComparison != 0);
                     break;
                 case DisplayMode.All:
                     result = true;
                     break;
                 case DisplayMode.None:
-                default:
-                    break;
-            }
-
-            return result;
-        }
-
-        private static bool GetShouldShowRow(ContentsMode mode, FileMetadata leftItem, FileMetadata rightItem, bool? areEqual)
-        {
-            bool result = false;
-
-            switch (mode)
-            {
-                case ContentsMode.Same:
-                    result = (areEqual.HasValue && areEqual.Value == true);
-                    break;
-                case ContentsMode.Differences:
-                    result = (areEqual.HasValue && areEqual.Value == false);
-                    break;
-                case ContentsMode.All:
-                    result = true;
-                    break;
-                case ContentsMode.None:
                 default:
                     break;
             }

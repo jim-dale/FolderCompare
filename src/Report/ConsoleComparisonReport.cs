@@ -63,7 +63,7 @@ namespace FolderCompare
         {
             CalculateWidths();
 
-            if (Helpers.GetShouldShowRow(_displayMode, _contentsMode, viewModel))
+            if (Helpers.GetShouldShowRow(_displayMode, viewModel))
             {
                 if (_showHeader)
                 {
@@ -71,23 +71,79 @@ namespace FolderCompare
                     _showHeader = false;
                 }
 
+                var leftPathColour = Console.ForegroundColor;
+                var leftDateColour = Console.ForegroundColor;
+                var leftSizeColour = Console.ForegroundColor;
+
+                var rightPathColour = Console.ForegroundColor;
+                var rightDateColour = Console.ForegroundColor;
+                var rightSizeColour = Console.ForegroundColor;
+
+                if (viewModel.LeftItem != null && viewModel.RightItem != null)
+                {
+                    //if (viewModel.RelPathComparison > 0)
+                    //{
+                    //    leftPathColour = ConsoleColor.Red;
+                    //}
+                    //else if (viewModel.RelPathComparison < 0)
+                    //{
+                    //    rightPathColour = ConsoleColor.Red;
+                    //}
+
+                    if (viewModel.LastWriteComparison > 0)
+                    {
+                        leftDateColour = ConsoleColor.Green;
+                    }
+                    else if (viewModel.LastWriteComparison < 0)
+                    {
+                        rightDateColour = ConsoleColor.Green;
+                    }
+
+                    if (viewModel.SizeComparison > 0)
+                    {
+                        leftSizeColour = ConsoleColor.Blue;
+                    }
+                    else if (viewModel.SizeComparison < 0)
+                    {
+                        rightSizeColour = ConsoleColor.Blue;
+                    }
+                }
+                Console.ForegroundColor = leftPathColour;
                 Console.Write(GetPathAsJustifiedString(viewModel.LeftItem?.RelativePath, Justification.Left));
+
+                Console.ResetColor();
                 Console.Write(VerticalLineChar);
+
+                Console.ForegroundColor = leftDateColour;
                 Console.Write(GetDateAsJustifiedString(viewModel.LeftItem?.LastWriteTimeUtc, Justification.Left));
+
+                Console.ResetColor();
                 Console.Write(VerticalLineChar);
+
+                Console.ForegroundColor = leftSizeColour;
                 Console.Write(GetSizeAsJustifiedString(viewModel.LeftItem?.Length, Justification.Right));
 
-                Console.Write(GetEqualitySeparator(viewModel.AreEqual));
+                Console.ResetColor();
+                Console.Write(GetEqualitySeparator(viewModel));
 
+                Console.ForegroundColor = rightPathColour;
                 Console.Write(GetPathAsJustifiedString(viewModel.RightItem?.RelativePath, Justification.Left));
+
+                Console.ResetColor();
                 Console.Write(VerticalLineChar);
+
+                Console.ForegroundColor = rightDateColour;
                 Console.Write(GetDateAsJustifiedString(viewModel.RightItem?.LastWriteTimeUtc, Justification.Left));
+
+                Console.ResetColor();
                 Console.Write(VerticalLineChar);
+
+                Console.ForegroundColor = rightSizeColour;
                 Console.Write(GetSizeAsJustifiedString(viewModel.RightItem?.Length, Justification.Right));
 
                 Console.WriteLine();
+                Console.ResetColor();
             }
-            Console.ResetColor();
         }
 
         private void OutputHeader()
@@ -200,21 +256,19 @@ namespace FolderCompare
             return sb.ToString();
         }
 
-        private static string GetEqualitySeparator(bool? areEqual)
+        private static string GetEqualitySeparator(CompareViewModel item)
         {
             string result = " " + DoubleVerticalChar + " ";
-
-            switch (areEqual)
+            if (item?.LeftItem != null && item.RightItem != null)
             {
-                case false:
-                    result = " " + NotEqualChar + " ";
-                    break;
-                case true:
+                if (item.ContentsComparison == 0)
+                {
                     result = " " + EqualChar + " ";
-                    break;
-                case null:
-                default:
-                    break;
+                }
+                else
+                {
+                    result = " " + NotEqualChar + " ";
+                }
             }
             return result;
         }

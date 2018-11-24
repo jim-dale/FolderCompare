@@ -7,7 +7,7 @@ namespace FolderCompare
     using System.Security.Cryptography;
     using System.Text;
 
-    public static class HashStream
+    public static class HashHelpers
     {
         private const int FileBufferSize = 1024 * 1024 * 8;     // 8MB buffer
 

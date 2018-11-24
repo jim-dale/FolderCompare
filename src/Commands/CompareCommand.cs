@@ -58,8 +58,6 @@ namespace FolderCompare
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();
 
-            int combined = 0;
-
             var items = Join(Context.LeftItems, Context.RightItems);
             if (items.Any())
             {
@@ -68,12 +66,10 @@ namespace FolderCompare
                 foreach (var item in items)
                 {
                     Context.Report.OutputRow(item);
-
-                    combined |= item.Comparison;
                 }
             }
 
-            return Helpers.GetComparisonResultAsExitCode(combined);
+            return ExitCode.Okay;
         }
 
         private IEnumerable<CompareViewModel> Join(IEnumerable<FileMetadata> leftItems, IEnumerable<FileMetadata> rightItems)
@@ -93,13 +89,7 @@ namespace FolderCompare
                     areEqual = Context.ContentsComparer.Equals(leftItem, rightItem);
                 }
 
-                yield return new CompareViewModel
-                {
-                    LeftItem = leftItem,
-                    RightItem = rightItem,
-                    Comparison = comparison,
-                    AreEqual = areEqual
-                };
+                yield return Helpers.CreateViewModel(leftItem, rightItem);
             }
         }
     }

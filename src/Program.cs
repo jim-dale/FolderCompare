@@ -1,6 +1,7 @@
 ﻿
 namespace FolderCompare
 {
+    using System;
     using System.Text;
     using McMaster.Extensions.CommandLineUtils;
 
@@ -8,7 +9,7 @@ namespace FolderCompare
     {
         private static int Main(string[] args)
         {
-            System.Console.OutputEncoding = Encoding.Unicode;
+            Console.OutputEncoding = Encoding.Unicode;
 
             var app = new CommandLineApplication<FolderCompareApp>();
             app.Model.Configure(app);

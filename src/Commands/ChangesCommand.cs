@@ -1,29 +1,81 @@
 ﻿
 namespace FolderCompare
 {
-    using McMaster.Extensions.CommandLineUtils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using McMaster.Extensions.CommandLineUtils;
 
-    public class ChangesContext
+    public class FileMetadataLookup
     {
-        // Set by command line parameters
-        public IMetadataSource LeftSource { get; set; }
-        public IMetadataSource RightSource { get; set; }
-        public DisplayMode DisplayMode { get; set; }
-        public ContentsMode ContentsMode { get; set; }
+        private readonly ILookup<string, FileMetadata> _relPathLookup;
+        private readonly ILookup<string, FileMetadata> _contentsLookup;
 
-        // Set at runtime
-        public IComparer<FileMetadata> Comparer { get; set; }
-        public IEqualityComparer<FileMetadata> EqualityComparer { get; set; }
-        public IEqualityComparer<FileMetadata> ContentsComparer { get; set; }
+        public FileMetadataLookup(IEnumerable<FileMetadata> items)
+        {
+            _relPathLookup = items.ToLookup(i => i.RelativePathHash, StringComparer.InvariantCultureIgnoreCase);
+            _contentsLookup = items.ToLookup(i => i.ContentsHash, StringComparer.InvariantCultureIgnoreCase);
+        }
 
-        public IComparisonReport Report { get; set; }
-
-        public IEnumerable<FileMetadata> LeftItems { get; set; }
-        public IEnumerable<FileMetadata> RightItems { get; set; }
+        public IEnumerable<FileMetadata> FindMatches(FileMetadata item)
+        {
+            var result = _relPathLookup[item.RelativePathHash];
+            if (result.FirstOrDefault() is null)
+            {
+                result = _contentsLookup[item.ContentsHash];
+            }
+            return result;
+        }
     }
+
+    public class Changes
+    {
+        /// <summary>
+        /// Exists on both sides but different FileMetadata
+        /// Moved RelPath different but ContentsHash the same (excluding duplicates)
+        /// Duplicates by ContentsHash
+        /// Orphan - exists only on one side
+        /// </summary>
+        /// <param name="leftSource"></param>
+        /// <param name="rightSource"></param>
+        /// <returns></returns>
+
+        public IEnumerable<CompareViewModel> GetItems(IMetadataSource leftSource, IMetadataSource rightSource)
+        {
+            var leftItems = leftSource.GetAll();
+            var rightItems = rightSource.GetAll();
+
+            // Create lookup to speed up matching items from left to right
+            var lookup = new FileMetadataLookup(rightItems);
+
+            List<FileMetadata> rightMatched = new List<FileMetadata>();
+            List<CompareViewModel> items = new List<CompareViewModel>();
+
+            foreach (var leftItem in leftItems)
+            {
+                var rightItem = default(FileMetadata);
+
+                var matches = lookup.FindMatches(leftItem);
+                if (matches.Count() == 1)
+                {
+                    rightItem = matches.Single();
+                }
+                if (rightItem != null)
+                {
+                    rightMatched.Add(rightItem);
+                }
+                items.Add(Helpers.CreateViewModel(leftItem, rightItem));
+            }
+            var rightRemaining = rightItems.Except(rightMatched);
+            foreach (var rightItem in rightRemaining)
+            {
+                items.Add(Helpers.CreateViewModel(null, rightItem));
+            }
+
+            return items;
+        }
+    }
+
 
     public class ChangesCommand
     {
@@ -34,8 +86,6 @@ namespace FolderCompare
         public CommandOption RightPathOption { get; private set; }
         public CommandOption<DisplayMode> DisplayModeOption { get; private set; }
         public CommandOption<ContentsMode> ContentsModeOption { get; private set; }
-
-        public ChangesContext Context { get; private set; }
 
         public void Configure(CommandLineApplication<ChangesCommand> cmd)
         {
@@ -60,80 +110,26 @@ namespace FolderCompare
 
         private int OnExecute()
         {
-            Context = new ChangesContext
-            {
-                LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value())),
-                RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value())),
-                DisplayMode = DisplayModeOption.HasValue() ? DisplayModeOption.ParsedValue : DefaultDisplayMode,
-                ContentsMode = ContentsModeOption.HasValue() ? ContentsModeOption.ParsedValue : DefaultContentsMode,
+            var changes = new Changes();
 
-                Comparer = new FileMetadataComparer(),
-                EqualityComparer = new RelPathHashEqualityComparer(),
-                ContentsComparer = new ContentsHashEqualityComparer(),
-            };
-
-            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode);
-
-            Context.LeftItems = Context.LeftSource.GetAll();
-            Context.RightItems = Context.RightSource.GetAll();
+            var leftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value()));
+            var rightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value()));
+            var displayMode = DisplayModeOption.HasValue() ? DisplayModeOption.ParsedValue : DefaultDisplayMode;
+            var contentsMode = ContentsModeOption.HasValue() ? ContentsModeOption.ParsedValue : DefaultContentsMode;
 
             var exitCode = ExitCode.FoldersAreTheSame;
+            var report = new ConsoleComparisonReport(displayMode, contentsMode);
 
-            // Exists on both sides but different FileMetadata
-            // Moved RelPath different but ContentsHash the same (excluding duplicates)
-            // Duplicates by ContentsHash
-            // Orphan - exists only on one side
-
-            // Exclude items that are the same in left and right lists
-            IEqualityComparer<FileMetadata> equalityComparer = new FileMetadataEqualityComparer();
-            var leftItems = Context.LeftItems.Except(Context.RightItems, equalityComparer);
-            var rightItems = Context.RightItems.Except(Context.LeftItems, equalityComparer);
-
-            // Create lookups to speed up matching items from left to right
-            var rightRelPathLookup = rightItems.ToLookup(i => i.RelativePathHash);
-            var rightContentsLookup = rightItems.ToLookup(i => i.ContentsHash);
-
-            List<FileMetadata> rightConsumed = new List<FileMetadata>();
-            List<CompareViewModel> items = new List<CompareViewModel>();
-
-            foreach (var leftItem in leftItems)
-            {
-                var rightItem = default(FileMetadata);
-
-                var matches = rightRelPathLookup[leftItem.RelativePathHash];
-                if (matches.Count() == 1)
-                {
-                    rightItem = matches.Single();
-                }
-                else
-                {
-                    var contentsMatches = rightContentsLookup[leftItem.ContentsHash];
-                    if (contentsMatches.Count() == 1)
-                    {
-                        rightItem = contentsMatches.Single();
-                    }
-                }
-                if (rightItem != null)
-                {
-                    rightConsumed.Add(rightItem);
-                }
-                items.Add(Helpers.CreateViewModel(leftItem, rightItem, Context.Comparer, Context.ContentsComparer));
-            }
-            var rightRemaining = rightItems.Except(rightConsumed);
-            foreach (var rightItem in rightRemaining)
-            {
-                items.Add(Helpers.CreateViewModel(null, rightItem, Context.Comparer, Context.ContentsComparer));
-            }
-
+            var items = changes.GetItems(leftSource, rightSource);
             if (items.Any())
             {
                 exitCode = ExitCode.FoldersAreDifferent;
 
-                Context.Report.SetSources(Context.LeftSource.Source, Context.RightSource.Source);
+                report.SetSources(leftSource.Source, rightSource.Source);
 
                 foreach (var item in items)
                 {
-                    Context.Report.OutputRow(item);
+                    report.OutputRow(item);
                 }
             }
 

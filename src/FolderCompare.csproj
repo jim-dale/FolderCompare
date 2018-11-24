@@ -46,9 +46,10 @@
     <Compile Include="Commands\ChangesCommand.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
     <Compile Include="CommandContexts\CompareContext.cs" />
-    <Compile Include="ContentsMode.cs" />
     <Compile Include="Commands\MovedCommand.cs" />
     <Compile Include="CommandContexts\MovedContext.cs" />
+    <Compile Include="ContentsMode.cs" />
+    <Compile Include="FileMetadataComparer.cs" />
     <Compile Include="Report\Justification.cs" />
     <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
@@ -57,14 +58,13 @@
     <Compile Include="DirectoryMetadataSource.cs" />
     <Compile Include="ExitCode.cs" />
     <Compile Include="Models\FileMetadata.cs" />
-    <Compile Include="Utility\FileMetadataComparer.cs" />
     <Compile Include="FileMetadataExtensions.cs" />
     <Compile Include="FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="Report\IComparisonReport.cs" />
     <Compile Include="Utility\FileMetadataEqualityComparer.cs" />
     <Compile Include="Utility\RelPathHashEqualityComparer.cs" />
-    <Compile Include="Utility\HashStream.cs" />
+    <Compile Include="Utility\HashHelpers.cs" />
     <Compile Include="Utility\Helpers.cs" />
     <Compile Include="Utility\IEnumerableOfTExtensions.cs" />
     <Compile Include="Utility\IMetadataSource.cs" />

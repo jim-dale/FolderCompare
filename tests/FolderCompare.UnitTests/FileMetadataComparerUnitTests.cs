@@ -9,7 +9,6 @@ namespace FolderCompare.UnitTests
     [TestClass]
     public class FileMetadataComparerUnitTests
     {
-        private FileMetadataComparer _sut = new FileMetadataComparer();
         private FileMetadata _lessThan;
         private FileMetadata _greaterThan;
 
@@ -20,23 +19,25 @@ namespace FolderCompare.UnitTests
             {
                 Length = 100,
                 LastWriteTimeUtc = DateTime.MinValue,
-                RelativePathHash = "abcdefg",
+                RelativePath = "abcdefg",
             };
 
             _greaterThan = new FileMetadata
             {
                 Length = 200,
                 LastWriteTimeUtc = DateTime.MaxValue,
-                RelativePathHash = "hijklmn",
+                RelativePath = "hijklmn",
             };
         }
 
         [TestMethod]
         public void Compare_SameInstance_AreEqual()
         {
-            var cmp = _sut.Compare(_lessThan, _lessThan);
+            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
 
-            Assert.AreEqual(FileMetadataComparer.Equal, cmp);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.LastWriteComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
 
         [TestMethod]
@@ -49,36 +50,42 @@ namespace FolderCompare.UnitTests
                 RelativePathHash = _lessThan.RelativePathHash,
             };
 
-            var cmp = _sut.Compare(_lessThan, other);
+            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
 
-            Assert.AreEqual(FileMetadataComparer.Equal, cmp);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.LastWriteComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
 
         #region null checks
         [TestMethod]
         public void Compare_BothNull_AreEqual()
         {
-            var cmp = _sut.Compare(null, null);
+            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
 
-            Assert.AreEqual(FileMetadataComparer.Equal, cmp);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.LastWriteComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
 
         [TestMethod]
         public void Compare_LeftNull_RightIsGreaterThanNull()
         {
-            var cmp = _sut.Compare(null, _greaterThan);
+            var vm = Helpers.CreateViewModel(null, _greaterThan);
 
-            Assert.IsTrue(cmp < 0);
-            Assert.AreEqual(FileMetadataComparer.RightOnly, cmp);
+            Assert.IsTrue(vm.RelPathComparison < 0);
+            Assert.IsTrue(vm.LastWriteComparison < 0);
+            Assert.IsTrue(vm.SizeComparison < 0);
         }
 
         [TestMethod]
         public void Compare_RightNull_LeftIsGreaterThanNull()
         {
-            var cmp = _sut.Compare(_lessThan, null);
+            var vm = Helpers.CreateViewModel(_lessThan, null);
 
-            Assert.IsTrue(cmp > 0);
-            Assert.AreEqual(FileMetadataComparer.LeftOnly, cmp);
+            Assert.IsTrue(vm.RelPathComparison > 0);
+            Assert.IsTrue(vm.LastWriteComparison > 0);
+            Assert.IsTrue(vm.SizeComparison > 0);
         }
         #endregion
 
@@ -89,10 +96,11 @@ namespace FolderCompare.UnitTests
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
             _greaterThan.Length = _lessThan.Length;
 
-            var cmp = _sut.Compare(_lessThan, _greaterThan);
+            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
 
-            Assert.IsTrue(cmp < 0);
-            Assert.AreEqual(FileMetadataComparer.RightRelPathGreater, cmp);
+            Assert.IsTrue(vm.RelPathComparison < 0);
+            Assert.AreEqual(0, vm.LastWriteComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
 
         [TestMethod]
@@ -101,10 +109,11 @@ namespace FolderCompare.UnitTests
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
             _greaterThan.Length = _lessThan.Length;
 
-            var cmp = _sut.Compare(_greaterThan, _lessThan);
+            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
 
-            Assert.IsTrue(cmp > 0);
-            Assert.AreEqual(FileMetadataComparer.LeftRelPathGreater, cmp);
+            Assert.IsTrue(vm.RelPathComparison > 0);
+            Assert.AreEqual(0, vm.LastWriteComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
         #endregion
 
@@ -112,25 +121,27 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_RightLastWriteTimeUtcIsMOreRecent_RightLastWriteGreater()
         {
-            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
+            _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.Length = _lessThan.Length;
 
-            var cmp = _sut.Compare(_lessThan, _greaterThan);
+            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
 
-            Assert.IsTrue(cmp < 0);
-            Assert.AreEqual(FileMetadataComparer.RightLastWriteGreater, cmp);
+            Assert.IsTrue(vm.LastWriteComparison < 0);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
 
         [TestMethod]
         public void Compare_LeftLastWriteTimeUtcIsMOreRecent_LeftLastWriteGreater()
         {
-            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
+            _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.Length = _lessThan.Length;
 
-            var cmp = _sut.Compare(_greaterThan, _lessThan);
+            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
 
-            Assert.IsTrue(cmp > 0);
-            Assert.AreEqual(FileMetadataComparer.LeftLastWriteGreater, cmp);
+            Assert.IsTrue(vm.LastWriteComparison > 0);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.SizeComparison);
         }
         #endregion
 
@@ -138,25 +149,27 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_RightFileLengthIsBigger_RightLengthGreater()
         {
-            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
+            _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
-            var cmp = _sut.Compare(_lessThan, _greaterThan);
+            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
 
-            Assert.IsTrue(cmp < 0);
-            Assert.AreEqual(FileMetadataComparer.RightLengthGreater, cmp);
+            Assert.IsTrue(vm.SizeComparison < 0);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.LastWriteComparison);
         }
 
         [TestMethod]
         public void Compare_LeftFileLengthIsBigger_LeftLengthGreater()
         {
-            _greaterThan.RelativePathHash = _lessThan.RelativePathHash;
+            _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
-            var cmp = _sut.Compare(_greaterThan, _lessThan);
+            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
 
-            Assert.IsTrue(cmp > 0);
-            Assert.AreEqual(FileMetadataComparer.LeftLengthGreater, cmp);
+            Assert.IsTrue(vm.SizeComparison > 0);
+            Assert.AreEqual(0, vm.RelPathComparison);
+            Assert.AreEqual(0, vm.LastWriteComparison);
         }
         #endregion
     }

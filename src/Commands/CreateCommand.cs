@@ -2,14 +2,13 @@
 namespace FolderCompare
 {
     using System;
-    using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
 
     public class CreateCommand
     {
         public CommandOption SourcePathOption { get; private set; }
         public CommandOption TargetPathOption { get; private set; }
-        public CommandOption NoHashContentsOption { get; private set; }
+        public CommandOption NoContentsHashOption { get; private set; }
 
         public CreateContext Context { get; private set; }
 
@@ -25,7 +24,7 @@ namespace FolderCompare
                 .IsRequired()
                 .Accepts(v => v.LegalFilePath());
 
-            NoHashContentsOption = cmd.Option("--no-hash-contents", "Do not generate a hash of the contents of each file.", CommandOptionType.NoValue);
+            NoContentsHashOption = cmd.Option("--no-contents-hash", "Do not generate a hash of the contents of each file.", CommandOptionType.NoValue);
 
             cmd.OnExecute((Func<int>)OnExecute);
         }
@@ -36,20 +35,10 @@ namespace FolderCompare
             {
                 Source = Helpers.GetMetadataSource(Helpers.ExpandPath(SourcePathOption.Value())),
                 Target = Helpers.GetMetadataTarget(Helpers.ExpandPath(TargetPathOption.Value())),
-                NoHashContents = NoHashContentsOption.HasValue(),
+                NoHashContents = NoContentsHashOption.HasValue(),
             };
 
-            Context.Items = Context.Source.GetAll();
-            if (Context.Items.Any())
-            {
-                if (Context.NoHashContents == false)
-                {
-                    Helpers.GenerateContentsHash(Context.Items, false);
-                }
-
-                Context.Target.SaveAll(Context.Items);
-            }
-            return ExitCode.Okay;
+            return Context.Run();
         }
     }
 }
