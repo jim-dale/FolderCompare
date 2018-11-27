@@ -1,11 +1,24 @@
 ﻿
 namespace FolderCompare
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     public class ChangesContext
     {
+        internal class Pair
+        {
+            public FileMetadata LeftItem { get; set; }
+            public FileMetadata RightItem { get; set; }
+
+            public static Pair Create(FileMetadata leftItem, FileMetadata rightItem)
+            {
+                return new Pair { LeftItem = leftItem, RightItem = rightItem };
+            }
+        }
+
         /// <summary>
         /// Exists on both sides but different FileMetadata
         /// Moved RelPath different but ContentsHash the same (excluding duplicates)
@@ -15,40 +28,105 @@ namespace FolderCompare
         /// <param name="leftSource"></param>
         /// <param name="rightSource"></param>
         /// <returns></returns>
-
         public IEnumerable<CompareViewModel> GetItems(IMetadataSource leftSource, IMetadataSource rightSource)
         {
             var leftItems = leftSource.GetAll();
             var rightItems = rightSource.GetAll();
 
-            // Create lookup to speed up matching items from left to right
-            var lookup = new FileMetadataLookup(rightItems);
-
-            List<FileMetadata> rightMatched = new List<FileMetadata>();
-            List<CompareViewModel> items = new List<CompareViewModel>();
+            var items = GetItems(leftItems, rightItems);
 
             foreach (var leftItem in leftItems)
             {
-                var rightItem = default(FileMetadata);
+                var item = items.SingleOrDefault(i => i.LeftItem == leftItem);
+                if (item.LeftItem is null && item.RightItem is null)
+                {
+                    Console.WriteLine($"Left Item not mapped = \"{leftItem.RelativePath}\"");
+                }
+            }
+            foreach (var rightItem in rightItems)
+            {
+                var item = items.SingleOrDefault(i => i.RightItem == rightItem);
+                if (item.LeftItem is null && item.RightItem is null)
+                {
+                    Console.WriteLine($"Right Item not mapped = \"{rightItem.RelativePath}\"");
+                }
+            }
 
-                var matches = lookup.FindMatches(leftItem);
+            var query = from item in items
+                        select Helpers.CreateViewModel(item.LeftItem, item.RightItem);
+
+            var result = query.OrderBy((vm) =>
+            {
+                var res = vm.LeftItem?.RelativePath ?? vm.RightItem?.RelativePath;
+                return res;
+            });
+            return result;
+        }
+
+        internal List<Pair> GetItems(IEnumerable<FileMetadata> leftItems, IEnumerable<FileMetadata> rightItems)
+        {
+            var results = new List<Pair>();
+
+            var matchedByRelPathHash = new List<FileMetadata>();
+            var lookup = rightItems.ToLookup(i => i.RelativePathHash, StringComparer.InvariantCultureIgnoreCase);
+
+            foreach (var leftItem in leftItems)
+            {
+                var matches = lookup[leftItem.RelativePathHash];
+                var rightItem = default(FileMetadata);
                 if (matches.Count() == 1)
                 {
-                    rightItem = matches.Single();
+                    var item = matches.Single();
+
+                    if (matchedByRelPathHash.Contains(item) == false)
+                    {
+                        matchedByRelPathHash.Add(item);
+                        rightItem = item;
+                    }
                 }
-                if (rightItem != null)
-                {
-                    rightMatched.Add(rightItem);
-                }
-                items.Add(Helpers.CreateViewModel(leftItem, rightItem));
-            }
-            var rightRemaining = rightItems.Except(rightMatched);
-            foreach (var rightItem in rightRemaining)
-            {
-                items.Add(Helpers.CreateViewModel(null, rightItem));
+
+                results.Add(Pair.Create(leftItem, rightItem));
             }
 
-            return items;
+            var rightRemaining = rightItems.Except(matchedByRelPathHash).ToList();
+
+            var matchedByContentsHash = new List<FileMetadata>();
+
+            foreach (var rightItem in rightRemaining)
+            {
+                var matches = from i in results
+                              where i.RightItem is null && StringComparer.InvariantCultureIgnoreCase.Equals(i.LeftItem.ContentsHash, rightItem.ContentsHash)
+                              select i;
+                if (matches.Count() == 1)
+                {
+                    var item = matches.Single();
+
+                    if (matchedByContentsHash.Contains(rightItem) == false)
+                    {
+                        matchedByContentsHash.Add(rightItem);
+                        item.RightItem = rightItem;
+                    }
+                }
+                else if (matches.Any())
+                {
+                    Trace.TraceWarning($"Multiple matches for {rightItem.ContentsHash}");
+                    foreach (var match in matches)
+                    {
+                        Trace.TraceWarning($"\tRelative file path=\"{match.LeftItem.RelativePath}\"");
+                    }
+                }
+                else
+                {
+                    Trace.TraceWarning($"No match for {rightItem.RelativePath}");
+                }
+            }
+            var stillRemaining = rightRemaining.Except(matchedByContentsHash).ToList();
+            foreach (var rightItem in stillRemaining)
+            {
+                results.Add(Pair.Create(null, rightItem));
+            }
+
+            return results;
         }
     }
 }

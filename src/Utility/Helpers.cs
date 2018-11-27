@@ -123,16 +123,19 @@ namespace FolderCompare
                     result = (viewModel.LeftItem is null);
                     break;
                 case DisplayMode.Different:
-                    result = (viewModel.ContentsComparison != 0 || viewModel.RelPathComparison != 0 || viewModel.LastWriteComparison != 0 || viewModel.SizeComparison != 0);
+                    result = (viewModel.RightItem is null || viewModel.LeftItem is null || viewModel.ContentsComparison != 0 || viewModel.RelPathComparison != 0 || viewModel.LastWriteComparison != 0 || viewModel.SizeComparison != 0);
                     break;
                 case DisplayMode.Moved:
                     result = (viewModel.ContentsComparison == 0 && viewModel.RelPathComparison != 0);
                     break;
                 case DisplayMode.Modified:
-                    result = (viewModel.LastWriteComparison != 0);
+                    result = (viewModel.RightItem != null && viewModel.LeftItem != null && viewModel.LastWriteComparison != 0);
                     break;
                 case DisplayMode.Size:
-                    result = (viewModel.SizeComparison != 0);
+                    result = (viewModel.RightItem != null && viewModel.LeftItem != null && viewModel.SizeComparison != 0);
+                    break;
+                case DisplayMode.Corrupt:
+                    result = (viewModel.ContentsComparison != 0 && viewModel.RelPathComparison == 0 && viewModel.LastWriteComparison == 0 && viewModel.SizeComparison == 0);
                     break;
                 case DisplayMode.All:
                     result = true;

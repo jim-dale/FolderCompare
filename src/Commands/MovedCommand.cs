@@ -44,7 +44,7 @@ namespace FolderCompare
                 EqualityComparer = new RelPathHashEqualityComparer(),
                 ContentsComparer = new ContentsHashEqualityComparer(),
 
-                Report = new ConsoleComparisonReport(DisplayMode.All, ContentsMode.All),
+                Report = new ConsoleComparisonReport(DisplayMode.All),
             };
 
             // Get all metadata entries

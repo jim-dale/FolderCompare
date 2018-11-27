@@ -22,9 +22,9 @@ namespace FolderCompare
         private const char PaddingChar = ' ';
         private const char EqualChar = '=';
         private const char NotEqualChar = '\u2260';
+        private const char LeftRightArrowChar = '\u2194';
 
         private readonly DisplayMode _displayMode;
-        private readonly ContentsMode _contentsMode;
 
         private string _leftSource;
         private string _rightSource;
@@ -45,10 +45,9 @@ namespace FolderCompare
             public string Text { get; set; }
         }
 
-        public ConsoleComparisonReport(DisplayMode displayMode, ContentsMode contentsMode)
+        public ConsoleComparisonReport(DisplayMode displayMode)
         {
             _displayMode = displayMode;
-            _contentsMode = contentsMode;
 
             _showHeader = true;
         }
@@ -81,15 +80,6 @@ namespace FolderCompare
 
                 if (viewModel.LeftItem != null && viewModel.RightItem != null)
                 {
-                    //if (viewModel.RelPathComparison > 0)
-                    //{
-                    //    leftPathColour = ConsoleColor.Red;
-                    //}
-                    //else if (viewModel.RelPathComparison < 0)
-                    //{
-                    //    rightPathColour = ConsoleColor.Red;
-                    //}
-
                     if (viewModel.LastWriteComparison > 0)
                     {
                         leftDateColour = ConsoleColor.Green;
@@ -177,9 +167,9 @@ namespace FolderCompare
             Console.Write(VerticalHorizontalChar);
             RepeatCharacter(HorizontalLineChar, _sizeColumnWidth);
 
+            Console.Write(VerticalHorizontalChar);
             Console.Write(HorizontalLineChar);
-            Console.Write(DoubleVertSingleHoriz);
-            Console.Write(HorizontalLineChar);
+            Console.Write(VerticalHorizontalChar);
 
             RepeatCharacter(HorizontalLineChar, _pathColumnWidth);
             Console.Write(VerticalHorizontalChar);
@@ -258,16 +248,25 @@ namespace FolderCompare
 
         private static string GetEqualitySeparator(CompareViewModel item)
         {
-            string result = " " + DoubleVerticalChar + " ";
+            char separator = VerticalLineChar;
+
+            string result = separator + " " + separator;
             if (item?.LeftItem != null && item.RightItem != null)
             {
                 if (item.ContentsComparison == 0)
                 {
-                    result = " " + EqualChar + " ";
+                    if (item.RelPathComparison != 0)
+                    {
+                        result = String.Empty + separator + LeftRightArrowChar + separator;
+                    }
+                    else
+                    {
+                        result = String.Empty + separator + EqualChar + separator;
+                    }
                 }
                 else
                 {
-                    result = " " + NotEqualChar + " ";
+                    result = String.Empty + separator + NotEqualChar + separator;
                 }
             }
             return result;

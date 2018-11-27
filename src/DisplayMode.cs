@@ -11,6 +11,7 @@ namespace FolderCompare
         Moved,
         Modified,
         Size,
+        Corrupt,
         All,
     }
 }

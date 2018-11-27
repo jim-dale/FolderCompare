@@ -8,12 +8,10 @@ namespace FolderCompare
     public class ChangesCommand
     {
         private const DisplayMode DefaultDisplayMode = DisplayMode.All;
-        private const ContentsMode DefaultContentsMode = ContentsMode.All;
 
         public CommandOption LeftPathOption { get; private set; }
         public CommandOption RightPathOption { get; private set; }
         public CommandOption<DisplayMode> DisplayModeOption { get; private set; }
-        public CommandOption<ContentsMode> ContentsModeOption { get; private set; }
 
         public void Configure(CommandLineApplication<ChangesCommand> cmd)
         {
@@ -30,9 +28,6 @@ namespace FolderCompare
             DisplayModeOption = cmd.Option<DisplayMode>("-d|--display-mode <MODE>", Helpers.EnumNamesAsString(DefaultDisplayMode), CommandOptionType.SingleValue)
                 .Accepts(v => v.Enum<DisplayMode>(true));
 
-            ContentsModeOption = cmd.Option<ContentsMode>("-c|--contents-mode <MODE>", Helpers.EnumNamesAsString(DefaultContentsMode), CommandOptionType.SingleValue)
-                .Accepts(v => v.Enum<ContentsMode>(true));
-
             cmd.OnExecute((Func<int>)OnExecute);
         }
 
@@ -43,10 +38,9 @@ namespace FolderCompare
             var leftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value()));
             var rightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value()));
             var displayMode = DisplayModeOption.HasValue() ? DisplayModeOption.ParsedValue : DefaultDisplayMode;
-            var contentsMode = ContentsModeOption.HasValue() ? ContentsModeOption.ParsedValue : DefaultContentsMode;
 
             var exitCode = ExitCode.FoldersAreTheSame;
-            var report = new ConsoleComparisonReport(displayMode, contentsMode);
+            var report = new ConsoleComparisonReport(displayMode);
 
             var items = changes.GetItems(leftSource, rightSource);
             if (items.Any())

@@ -9,12 +9,10 @@ namespace FolderCompare
     public class CompareCommand
     {
         private const DisplayMode DefaultDisplayMode = DisplayMode.All;
-        private const ContentsMode DefaultContentsMode = ContentsMode.All;
 
         public CommandOption LeftPathOption { get; private set; }
         public CommandOption RightPathOption { get; private set; }
         public CommandOption<DisplayMode> DisplayModeOption { get; private set; }
-        public CommandOption<ContentsMode> ContentsModeOption { get; private set; }
 
         public CompareContext Context { get; private set; }
 
@@ -33,9 +31,6 @@ namespace FolderCompare
             DisplayModeOption = cmd.Option<DisplayMode>("-d|--display-mode <MODE>", Helpers.EnumNamesAsString(DefaultDisplayMode), CommandOptionType.SingleValue)
                 .Accepts(v => v.Enum<DisplayMode>(true));
 
-            ContentsModeOption = cmd.Option<ContentsMode>("-c|--contents-mode <MODE>", Helpers.EnumNamesAsString(DefaultContentsMode), CommandOptionType.SingleValue)
-                .Accepts(v => v.Enum<ContentsMode>(true));
-
             cmd.OnExecute((Func<int>)OnExecute);
         }
 
@@ -46,14 +41,13 @@ namespace FolderCompare
                 LeftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value())),
                 RightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value())),
                 DisplayMode = DisplayModeOption.HasValue() ? DisplayModeOption.ParsedValue : DefaultDisplayMode,
-                ContentsMode = ContentsModeOption.HasValue() ? ContentsModeOption.ParsedValue : DefaultContentsMode,
 
                 Comparer = new FileMetadataComparer(),
                 EqualityComparer = new RelPathHashEqualityComparer(),
                 ContentsComparer = new ContentsHashEqualityComparer(),
             };
 
-            Context.Report = new ConsoleComparisonReport(Context.DisplayMode, Context.ContentsMode);
+            Context.Report = new ConsoleComparisonReport(Context.DisplayMode);
 
             Context.LeftItems = Context.LeftSource.GetAll();
             Context.RightItems = Context.RightSource.GetAll();

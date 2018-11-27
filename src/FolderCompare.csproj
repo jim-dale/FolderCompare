@@ -50,7 +50,6 @@
     <Compile Include="Utility\FileMetadataLookup.cs" />
     <Compile Include="Commands\MovedCommand.cs" />
     <Compile Include="CommandContexts\MovedContext.cs" />
-    <Compile Include="ContentsMode.cs" />
     <Compile Include="FileMetadataComparer.cs" />
     <Compile Include="Report\Justification.cs" />
     <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
