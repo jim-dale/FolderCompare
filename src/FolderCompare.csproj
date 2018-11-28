@@ -45,11 +45,9 @@
   <ItemGroup>
     <Compile Include="Commands\ChangesCommand.cs" />
     <Compile Include="CommandContexts\ChangesContext.cs" />
-    <Compile Include="Commands\CompareCommand.cs" />
-    <Compile Include="CommandContexts\CompareContext.cs" />
+    <Compile Include="Commands\DuplicatesCommand.cs" />
+    <Compile Include="CommandContexts\DuplicatesContext.cs" />
     <Compile Include="Utility\FileMetadataLookup.cs" />
-    <Compile Include="Commands\MovedCommand.cs" />
-    <Compile Include="CommandContexts\MovedContext.cs" />
     <Compile Include="FileMetadataComparer.cs" />
     <Compile Include="Report\Justification.cs" />
     <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
