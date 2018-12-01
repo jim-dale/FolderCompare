@@ -32,7 +32,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void TestMethod1()
         {
-            var sut = new ChangesContext();
+            var sut = new CompareContext();
 
             //sut.GetItems(new List<FileMetadata> { _item1 }, new List<FileMetadata> { _item2 });
         }

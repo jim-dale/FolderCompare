@@ -19,7 +19,7 @@ namespace FolderCompare
 
             _app.Command<CreateCommand>("create", (cmd) => cmd.Model.Configure(cmd));
             _app.Command<DuplicatesCommand>("duplicates", (cmd) => cmd.Model.Configure(cmd));
-            _app.Command<ChangesCommand>("changes", (cmd) => cmd.Model.Configure(cmd));
+            _app.Command<CompareCommand>("compare", (cmd) => cmd.Model.Configure(cmd));
 
             _app.OnExecute((Func<int>)OnExecute);
 

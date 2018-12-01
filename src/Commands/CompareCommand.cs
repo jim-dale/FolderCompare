@@ -5,7 +5,7 @@ namespace FolderCompare
     using System.Linq;
     using McMaster.Extensions.CommandLineUtils;
 
-    public class ChangesCommand
+    public class CompareCommand
     {
         private const DisplayMode DefaultDisplayMode = DisplayMode.All;
 
@@ -13,7 +13,7 @@ namespace FolderCompare
         public CommandOption RightPathOption { get; private set; }
         public CommandOption<DisplayMode> DisplayModeOption { get; private set; }
 
-        public void Configure(CommandLineApplication<ChangesCommand> cmd)
+        public void Configure(CommandLineApplication<CompareCommand> cmd)
         {
             cmd.HelpOption("-?|--help");
 
@@ -33,7 +33,7 @@ namespace FolderCompare
 
         private int OnExecute()
         {
-            var changes = new ChangesContext();
+            var changes = new CompareContext();
 
             var leftSource = Helpers.GetMetadataSource(Helpers.ExpandPath(LeftPathOption.Value()));
             var rightSource = Helpers.GetMetadataSource(Helpers.ExpandPath(RightPathOption.Value()));

@@ -6,19 +6,8 @@ namespace FolderCompare
     using System.Diagnostics;
     using System.Linq;
 
-    public class ChangesContext
+    public partial class CompareContext
     {
-        internal class Pair
-        {
-            public FileMetadata LeftItem { get; set; }
-            public FileMetadata RightItem { get; set; }
-
-            public static Pair Create(FileMetadata leftItem, FileMetadata rightItem)
-            {
-                return new Pair { LeftItem = leftItem, RightItem = rightItem };
-            }
-        }
-
         /// <summary>
         /// Exists on both sides but different FileMetadata
         /// Moved RelPath different but ContentsHash the same (excluding duplicates)
