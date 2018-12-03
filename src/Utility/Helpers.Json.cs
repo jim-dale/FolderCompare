@@ -5,7 +5,7 @@ namespace FolderCompare
     using System.IO;
     using Newtonsoft.Json;
 
-    public static class JsonHelpers
+    public static partial class Helpers
     {
         public static List<FileMetadata> LoadFromJson(string path)
         {

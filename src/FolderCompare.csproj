@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ICommand.cs" />
-    <Compile Include="Utility\Pair.cs" />
+    <Compile Include="Factories\FileMetadataFactory.cs" />
+    <Compile Include="Utility\Helpers.Metadata.cs" />
+    <Compile Include="Models\Pair.cs" />
     <Compile Include="AppCommands\CompareAppCommand.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
     <Compile Include="AppCommands\DuplicatesAppCommand.cs" />
@@ -53,29 +55,31 @@
     <Compile Include="DisplayMode.cs" />
     <Compile Include="AppCommands\CreateAppCommand.cs" />
     <Compile Include="Commands\CreateCommand.cs" />
-    <Compile Include="DirectoryMetadataSource.cs" />
+    <Compile Include="Repositories\DirectoryMetadataSource.cs" />
     <Compile Include="ExitCode.cs" />
     <Compile Include="Models\FileMetadata.cs" />
     <Compile Include="Extensions\FileMetadataExtensions.cs" />
     <Compile Include="Extensions\FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="Report\IComparisonReport.cs" />
-    <Compile Include="Utility\HashHelpers.cs" />
+    <Compile Include="Utility\Helpers.Hash.cs" />
     <Compile Include="Utility\Helpers.cs" />
     <Compile Include="Extensions\IEnumerableOfTExtensions.cs" />
-    <Compile Include="Utility\IMetadataSource.cs" />
-    <Compile Include="Utility\IMetadataTarget.cs" />
-    <Compile Include="Utility\JsonHelpers.cs" />
-    <Compile Include="JsonMetadataSource.cs" />
-    <Compile Include="JsonMetadataTarget.cs" />
+    <Compile Include="Repositories\IMetadataSource.cs" />
+    <Compile Include="Repositories\IMetadataTarget.cs" />
+    <Compile Include="Utility\Helpers.Json.cs" />
+    <Compile Include="Repositories\JsonMetadataSource.cs" />
+    <Compile Include="Repositories\JsonMetadataTarget.cs" />
     <Compile Include="Utility\NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Report\ConsoleComparisonReport.cs" />
     <Compile Include="ViewModels\CompareViewModel.cs" />
+    <Compile Include="Factories\ViewModelFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="Utility\Helpers.Report.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils">

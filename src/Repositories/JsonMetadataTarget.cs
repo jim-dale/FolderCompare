@@ -9,7 +9,7 @@ namespace FolderCompare
 
         public void SaveAll(IEnumerable<FileMetadata> items)
         {
-            JsonHelpers.SaveToJson(items, Target);
+            Helpers.SaveToJson(items, Target);
         }
     }
 }

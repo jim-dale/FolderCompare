@@ -5,7 +5,7 @@ namespace FolderCompare
     {
         public static FileMetadata HashFileContents(this FileMetadata item)
         {
-            item.ContentsHash = HashHelpers.GetFileHashSHA512(item.OriginalPath);
+            item.ContentsHash = Helpers.GetFileHashSHA512(item.OriginalPath);
             return item;
         }
     }

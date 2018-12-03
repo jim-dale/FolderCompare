@@ -9,7 +9,7 @@ namespace FolderCompare
 
         public List<FileMetadata> GetAll()
         {
-            return JsonHelpers.LoadFromJson(Source);
+            return Helpers.LoadFromJson(Source);
         }
     }
 }

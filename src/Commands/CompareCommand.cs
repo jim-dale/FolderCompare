@@ -69,13 +69,13 @@ namespace FolderCompare
 #endif
 
             var query = from item in pairs
-                        select Helpers.CreateViewModel(item.LeftItem, item.RightItem);
+                        select ViewModelFactory.Create(item.LeftItem, item.RightItem);
 
             var result = query.OrderBy((vm) =>
             {
                 var res = vm.LeftItem?.RelativePath ?? vm.RightItem?.RelativePath;
                 return res;
-            });
+            }, StringComparer.InvariantCultureIgnoreCase);
 
             return result;
         }

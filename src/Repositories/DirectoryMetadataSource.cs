@@ -20,7 +20,7 @@ namespace FolderCompare
             var files = directoryInfo.GetFiles("*.*", SearchOption.AllDirectories);
 
             var query = from file in files
-                        select Helpers.CreateFileMetadata(directoryInfo, file);
+                        select FileMetadataFactory.Create(directoryInfo, file);
 
             return query.ToList();
         }

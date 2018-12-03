@@ -2,14 +2,30 @@
 namespace FolderCompare
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
 
-    public static class HashHelpers
+    public static partial class Helpers
     {
         private const int FileBufferSize = 1024 * 1024 * 8;     // 8MB buffer
+
+        public static void GenerateContentsHash(IEnumerable<FileMetadata> items, bool force)
+        {
+            var query = items;
+
+            if (force == false)
+            {
+                query = from i in items
+                        where i.ContentsHash is null
+                        select i;
+            }
+
+            query.ForEach((item) => item.ContentsHash = GetFileHashSHA512(item.OriginalPath));
+        }
 
         public static string GetStringHashSHA512(string str)
         {

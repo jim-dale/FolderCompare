@@ -23,5 +23,13 @@ namespace FolderCompare
 
             return query;
         }
+
+        public static void ForEach<TSource>(this IEnumerable<TSource> items, Action<TSource> action)
+        {
+            foreach (var item in items)
+            {
+                action.Invoke(item);
+            }
+        }
     }
 }

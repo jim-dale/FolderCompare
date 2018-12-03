@@ -33,7 +33,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_SameInstance_AreEqual()
         {
-            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
+            var vm = ViewModelFactory.Create(_lessThan, _lessThan);
 
             Assert.AreEqual(0, vm.RelPathComparison);
             Assert.AreEqual(0, vm.LastWriteComparison);
@@ -50,7 +50,7 @@ namespace FolderCompare.UnitTests
                 RelativePathHash = _lessThan.RelativePathHash,
             };
 
-            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
+            var vm = ViewModelFactory.Create(_lessThan, _lessThan);
 
             Assert.AreEqual(0, vm.RelPathComparison);
             Assert.AreEqual(0, vm.LastWriteComparison);
@@ -61,7 +61,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_BothNull_AreEqual()
         {
-            var vm = Helpers.CreateViewModel(_lessThan, _lessThan);
+            var vm = ViewModelFactory.Create(_lessThan, _lessThan);
 
             Assert.AreEqual(0, vm.RelPathComparison);
             Assert.AreEqual(0, vm.LastWriteComparison);
@@ -71,7 +71,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_LeftNull_RightIsGreaterThanNull()
         {
-            var vm = Helpers.CreateViewModel(null, _greaterThan);
+            var vm = ViewModelFactory.Create(null, _greaterThan);
 
             Assert.IsTrue(vm.RelPathComparison < 0);
             Assert.IsTrue(vm.LastWriteComparison < 0);
@@ -81,7 +81,7 @@ namespace FolderCompare.UnitTests
         [TestMethod]
         public void Compare_RightNull_LeftIsGreaterThanNull()
         {
-            var vm = Helpers.CreateViewModel(_lessThan, null);
+            var vm = ViewModelFactory.Create(_lessThan, null);
 
             Assert.IsTrue(vm.RelPathComparison > 0);
             Assert.IsTrue(vm.LastWriteComparison > 0);
@@ -96,7 +96,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
             _greaterThan.Length = _lessThan.Length;
 
-            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
+            var vm = ViewModelFactory.Create(_lessThan, _greaterThan);
 
             Assert.IsTrue(vm.RelPathComparison < 0);
             Assert.AreEqual(0, vm.LastWriteComparison);
@@ -109,7 +109,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
             _greaterThan.Length = _lessThan.Length;
 
-            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
+            var vm = ViewModelFactory.Create(_greaterThan, _lessThan);
 
             Assert.IsTrue(vm.RelPathComparison > 0);
             Assert.AreEqual(0, vm.LastWriteComparison);
@@ -124,7 +124,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.Length = _lessThan.Length;
 
-            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
+            var vm = ViewModelFactory.Create(_lessThan, _greaterThan);
 
             Assert.IsTrue(vm.LastWriteComparison < 0);
             Assert.AreEqual(0, vm.RelPathComparison);
@@ -137,7 +137,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.Length = _lessThan.Length;
 
-            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
+            var vm = ViewModelFactory.Create(_greaterThan, _lessThan);
 
             Assert.IsTrue(vm.LastWriteComparison > 0);
             Assert.AreEqual(0, vm.RelPathComparison);
@@ -152,7 +152,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
-            var vm = Helpers.CreateViewModel(_lessThan, _greaterThan);
+            var vm = ViewModelFactory.Create(_lessThan, _greaterThan);
 
             Assert.IsTrue(vm.SizeComparison < 0);
             Assert.AreEqual(0, vm.RelPathComparison);
@@ -165,7 +165,7 @@ namespace FolderCompare.UnitTests
             _greaterThan.RelativePath = _lessThan.RelativePath;
             _greaterThan.LastWriteTimeUtc = _lessThan.LastWriteTimeUtc;
 
-            var vm = Helpers.CreateViewModel(_greaterThan, _lessThan);
+            var vm = ViewModelFactory.Create(_greaterThan, _lessThan);
 
             Assert.IsTrue(vm.SizeComparison > 0);
             Assert.AreEqual(0, vm.RelPathComparison);
