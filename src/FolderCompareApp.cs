@@ -17,9 +17,9 @@ namespace FolderCompare
             _app.HelpOption("-?|--help");
             _app.VersionOption("--version", app.Model.GetVersion);
 
-            _app.Command<CreateCommand>("create", (cmd) => cmd.Model.Configure(cmd));
-            _app.Command<DuplicatesCommand>("duplicates", (cmd) => cmd.Model.Configure(cmd));
-            _app.Command<CompareCommand>("compare", (cmd) => cmd.Model.Configure(cmd));
+            _app.Command<CreateAppCommand>("create", (cmd) => cmd.Model.Configure(cmd));
+            _app.Command<DuplicatesAppCommand>("duplicates", (cmd) => cmd.Model.Configure(cmd));
+            _app.Command<CompareAppCommand>("compare", (cmd) => cmd.Model.Configure(cmd));
 
             _app.OnExecute((Func<int>)OnExecute);
 

@@ -1,44 +1,27 @@
 ﻿
 namespace FolderCompare
 {
-    using System;
-    using McMaster.Extensions.CommandLineUtils;
+    using System.Linq;
 
-    public class CreateCommand
+    public class CreateCommand : ICommand
     {
-        public CommandOption SourcePathOption { get; private set; }
-        public CommandOption TargetPathOption { get; private set; }
-        public CommandOption NoContentsHashOption { get; private set; }
+        public IMetadataSource Source { get; set; }
+        public IMetadataTarget Target { get; set; }
+        public bool NoHashContents { get; set; }
 
-        public CreateContext Context { get; private set; }
-
-        public void Configure(CommandLineApplication<CreateCommand> cmd)
+        public int Run()
         {
-            cmd.HelpOption("-?|--help");
-
-            SourcePathOption = cmd.Option("-i|--input <PATH>", "Path to the folder to search.", CommandOptionType.SingleValue)
-                .IsRequired()
-                .Accepts(v => v.ExistingDirectory());
-
-            TargetPathOption = cmd.Option("-o|--output <PATH>", "Path to the JSON catalogue file to create.", CommandOptionType.SingleValue)
-                .IsRequired()
-                .Accepts(v => v.LegalFilePath());
-
-            NoContentsHashOption = cmd.Option("--no-contents-hash", "Do not generate a hash of the contents of each file.", CommandOptionType.NoValue);
-
-            cmd.OnExecute((Func<int>)OnExecute);
-        }
-
-        private int OnExecute()
-        {
-            Context = new CreateContext
+            var items = Source.GetAll();
+            if (items.Any())
             {
-                Source = Helpers.GetMetadataSource(Helpers.ExpandPath(SourcePathOption.Value())),
-                Target = Helpers.GetMetadataTarget(Helpers.ExpandPath(TargetPathOption.Value())),
-                NoHashContents = NoContentsHashOption.HasValue(),
-            };
+                if (NoHashContents == false)
+                {
+                    Helpers.GenerateContentsHash(items, false);
+                }
 
-            return Context.Run();
+                Target.SaveAll(items);
+            }
+            return ExitCode.Okay;
         }
     }
 }

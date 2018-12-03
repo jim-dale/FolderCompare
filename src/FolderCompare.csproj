@@ -43,30 +43,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Utility\Pair.cs" />
+    <Compile Include="AppCommands\CompareAppCommand.cs" />
     <Compile Include="Commands\CompareCommand.cs" />
-    <Compile Include="CommandContexts\CompareContext.cs" />
+    <Compile Include="AppCommands\DuplicatesAppCommand.cs" />
     <Compile Include="Commands\DuplicatesCommand.cs" />
-    <Compile Include="CommandContexts\DuplicatesContext.cs" />
-    <Compile Include="Utility\FileMetadataLookup.cs" />
-    <Compile Include="FileMetadataComparer.cs" />
     <Compile Include="Report\Justification.cs" />
-    <Compile Include="Utility\ContentsHashEqualityComparer.cs" />
     <Compile Include="DisplayMode.cs" />
+    <Compile Include="AppCommands\CreateAppCommand.cs" />
     <Compile Include="Commands\CreateCommand.cs" />
-    <Compile Include="CommandContexts\CreateContext.cs" />
     <Compile Include="DirectoryMetadataSource.cs" />
     <Compile Include="ExitCode.cs" />
     <Compile Include="Models\FileMetadata.cs" />
-    <Compile Include="FileMetadataExtensions.cs" />
-    <Compile Include="FileSystemInfoExtensions.cs" />
+    <Compile Include="Extensions\FileMetadataExtensions.cs" />
+    <Compile Include="Extensions\FileSystemInfoExtensions.cs" />
     <Compile Include="FolderCompareApp.cs" />
     <Compile Include="Report\IComparisonReport.cs" />
-    <Compile Include="Utility\FileMetadataEqualityComparer.cs" />
-    <Compile Include="Utility\RelPathHashEqualityComparer.cs" />
     <Compile Include="Utility\HashHelpers.cs" />
     <Compile Include="Utility\Helpers.cs" />
-    <Compile Include="Utility\IEnumerableOfTExtensions.cs" />
+    <Compile Include="Extensions\IEnumerableOfTExtensions.cs" />
     <Compile Include="Utility\IMetadataSource.cs" />
     <Compile Include="Utility\IMetadataTarget.cs" />
     <Compile Include="Utility\JsonHelpers.cs" />

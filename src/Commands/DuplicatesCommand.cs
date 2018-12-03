@@ -1,41 +1,18 @@
 ﻿
 namespace FolderCompare
 {
-    using McMaster.Extensions.CommandLineUtils;
     using System;
     using System.Linq;
 
-    public class DuplicatesCommand
+    public class DuplicatesCommand : ICommand
     {
-        private const DisplayMode DefaultDisplayMode = DisplayMode.All;
+        public IMetadataSource Source { get; set; }
 
-        public CommandOption InputOption { get; private set; }
-
-        public DuplicatesContext Context { get; private set; }
-
-        public void Configure(CommandLineApplication<DuplicatesCommand> cmd)
+        public int Run()
         {
-            cmd.HelpOption("-?|--help");
+            var items = Source.GetAll();
 
-            InputOption = cmd.Option("-i|--input <PATH>", "Path to the folder or catalogue to search for duplicate files.", CommandOptionType.SingleValue)
-                .IsRequired()
-                .Accepts(v => v.ExistingFileOrDirectory());
-
-            cmd.OnExecute((Func<int>)OnExecute);
-        }
-
-        private int OnExecute()
-        {
-            Context = new DuplicatesContext
-            {
-                Source = Helpers.GetMetadataSource(Helpers.ExpandPath(InputOption.Value())),
-            };
-
-            Context.Report = new ConsoleComparisonReport(DisplayMode.All);
-
-            Context.Items = Context.Source.GetAll();
-
-            var duplicates = Context.Items.GetDuplicates(i => i.ContentsHash);
+            var duplicates = items.GetDuplicates(i => i.ContentsHash, StringComparer.InvariantCultureIgnoreCase);
             foreach (var group in duplicates)
             {
                 Console.WriteLine(group.First().FileName);
